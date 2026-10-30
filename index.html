@@ -184,7 +184,7 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.8";
+var APP_VERSION="5.9";
 var APP_URL="https://ddnnews.github.io/myfreevision/";
 function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
 function chromeUrl(){return isIOS()?"googlechromes://"+APP_URL.replace(/^https:\/\//,""):APP_URL}
@@ -339,7 +339,17 @@ var VLIB={
   {id:"_VFRpeEQQxM",t:"Geführte Meditation für den Morgen",ch:"Mady Morrison",d:"5:56"},
   {id:"H1AM0-9koVc",t:"50 positive Affirmationen für den Morgen",ch:"Mady Morrison",d:"12:22"},
   {id:"wcG-duYAdYM",t:"Disziplin entwickeln in 7 Schritten",ch:"Henry Hildebrandt",d:"13:44"},
-  {id:"Mix5JOgYTuQ",t:"Eine der besten Motivationsreden",ch:"Oscar Karem",d:"13:25"}
+  {id:"Mix5JOgYTuQ",t:"Eine der besten Motivationsreden",ch:"Oscar Karem",d:"13:25"},
+  {id:"ockCQMt9kM0",t:"Geführte Meditation für Anfänger",ch:"Mady Morrison",d:"11:29"},
+  {id:"TZs35mJGBtQ",t:"10 Minuten Entspannen und Loslassen",ch:"Anika Henkelmann",d:"10:01"},
+  {id:"8PDNefiFG1A",t:"Morgen-Meditation: mit Energie in den Tag",ch:"Laura Malina Seiler",d:"7:08"},
+  {id:"YE4Edez-d9Y",t:"Innere Ruhe und neuer Fokus",ch:"Verena Leuze",d:"11:03"},
+  {id:"nXZqY3MXl5o",t:"Stress und innere Unruhe loslassen",ch:"Anika Henkelmann",d:"15:00"},
+  {id:"98XyXBHAB9Q",t:"4-7-8-Atemtechnik zum Mitmachen",ch:"Mentalreisen",d:"4:12"},
+  {id:"OSk0AUT4_8o",t:"So krempelst du dein Leben um",ch:"Dinge Erklärt – Kurzgesagt",d:"10:57"},
+  {id:"4lXp3L9a0TA",t:"Gewohnheiten, die dein Leben verändern",ch:"Dirk Kreuter",d:"11:03"},
+  {id:"7MCvBPpsNDg",t:"Gewohnheiten aufbauen: die 1-%-Methode",ch:"Simon Josef Eckert",d:"16:11"},
+  {id:"oCTs3hWIn0E",t:"Der Schlüssel zu Disziplin und Erfolg",ch:"PowerMind",d:"8:45"}
  ],
  sport45:[
   {id:"cDq-nFmD0rI",t:"45 Min Ganzkörpertraining",ch:"Rowan Row",d:"46:38",s:["Ganzkörper"]},
@@ -410,9 +420,9 @@ function ytCard(c){
   (full?'<p class="muted">Alle 5 Plätze sind belegt. Löschen Sie ein Video, um ein neues zu speichern.</p>':'')+
   '<button class="primary" data-act="ladd" data-list="'+c.key+'" data-ti="'+c.ti+'" data-ui="'+c.ui+'"'+(full?' disabled':'')+'>Video speichern</button></div>'+
   '<p class="eyebrow" style="margin-top:1.2rem">Auf YouTube suchen</p>'+
-  '<form class="ytbar" data-yt="1"'+(c.dur?' data-dur="'+c.dur+'" data-long="1"':'')+(c.style?' data-style="'+esc(c.style)+'"':'')+' role="search"><label class="sr-only" for="'+c.q+'">Suchbegriff für YouTube</label><input id="'+c.q+'" type="search" maxlength="100" placeholder="'+c.ph+'" enterkeyhint="search"><button type="submit">Suchen</button></form>'+
-  '<div class="chips">'+c.chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q,!!c.dur)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
-  (c.dur?'<p class="muted">Die Suche ist auf '+(c.style?'den Stil „'+esc(sp.name)+'“ und ':'')+'die Länge abgestimmt: Sie ergänzt „'+c.dur+'“ und zeigt bei YouTube nur Videos über 20 Minuten.'+(c.style?' Ohne Suchbegriff sucht sie nach „'+esc(c.style)+'“.':'')+'</p>':'')+
+  '<form class="ytbar" data-yt="1"'+(c.dur?' data-dur="'+c.dur+'"':'')+(c.sp?' data-sp="'+c.sp+'"':'')+(c.style?' data-style="'+esc(c.style)+'"':'')+' role="search"><label class="sr-only" for="'+c.q+'">Suchbegriff für YouTube</label><input id="'+c.q+'" type="search" maxlength="100" placeholder="'+c.ph+'" enterkeyhint="search"><button type="submit">Suchen</button></form>'+
+  '<div class="chips">'+c.chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q,c.sp)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  (c.topic?'<p class="muted">Die Suche ist auf '+esc(c.topic)+' abgestimmt'+(c.dur?' und ergänzt „'+c.dur+'“':'')+'. YouTube zeigt nur Videos '+(c.lenNote||'')+'.'+(c.style?' Ohne Suchbegriff sucht sie nach „'+esc(c.style)+'“.':'')+'</p>':'')+
   '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann oben bei „YouTube-Link“ einfügen und speichern.</p>'+
   '<p class="muted"><span class="tag ext">Extern: YouTube</span> Konto, Suche und Videos laufen bei YouTube (Google) und brauchen Internet.</p></div>';
 }
@@ -423,6 +433,7 @@ var YT_CHIPS_SPORT=["15 Min Workout ohne Geräte","HIIT 15 Minuten","Workout ohn
 var SPORT_MAX=5;
 var YT_CHIPS_SPORT45=["45 Min Ganzkörper Workout","45 Min Workout ohne Springen","45 Min Pilates","45 Min Krafttraining zuhause","45 Min HIIT","45 Min Yoga Flow","45 Min Yoga Rücken","45 Min Yin Yoga"];
 var YT_LONG="EgIYAg%3D%3D";
+var YT_MID="EgIYAw%3D%3D";
 var STYLE_Q={"Ganzkörper":["Ganzkörper Workout","Ganzkörper ohne Springen","Ganzkörper ohne Geräte","HIIT Ganzkörper"],"Core & Rücken":["Rücken Workout","Bauch Workout","Pilates","Rücken Yoga"],"Beweglichkeit":["Yoga Flow","Mobility Routine","Dehnen","Yin Yoga"],"Muskelaufbau":["Muskelaufbau zuhause","Muskelaufbau ohne Geräte","Krafttraining mit Hanteln","Oberkörper Muskelaufbau","Beine und Po Kraft"],"Gewicht verlieren":["Fettverbrennung Workout","Abnehmen ohne Springen","Cardio im Stehen","HIIT Fatburner","Kalorien verbrennen"]};
 var STYLE_KEY={"Ganzkörper":"Ganzkörper Workout","Core & Rücken":"Rücken und Bauch Workout","Beweglichkeit":"Yoga Mobility","Muskelaufbau":"Muskelaufbau Workout zuhause","Gewicht verlieren":"Fettverbrennung Workout abnehmen"};
 function styleChips(min){return (STYLE_Q[sp.name]||STYLE_Q["Ganzkörper"]).map(function(x){return min+" Min "+x})}
@@ -434,7 +445,13 @@ function ytSearchCard(id,title,intro,chips,ph){
   '<div class="chips">'+chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
   '<p style="margin:.2rem 0 .6rem"><a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube öffnen</a></p>';
 }
-function ytSearchUrl(q,long){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)+(long?"&sp="+YT_LONG:"")}
+function ytSearchUrl(q,spc){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)+(spc?"&sp="+spc:"")}
+var THEMES=["Motivation","Meditation","Mindset & Erfolg"];
+var THEME_OF={"_VFRpeEQQxM":"Meditation","H1AM0-9koVc":"Meditation","ockCQMt9kM0":"Meditation","TZs35mJGBtQ":"Meditation","8PDNefiFG1A":"Meditation","YE4Edez-d9Y":"Meditation","nXZqY3MXl5o":"Meditation","98XyXBHAB9Q":"Meditation","wcG-duYAdYM":"Mindset & Erfolg","OSk0AUT4_8o":"Mindset & Erfolg","4lXp3L9a0TA":"Mindset & Erfolg","7MCvBPpsNDg":"Mindset & Erfolg","oCTs3hWIn0E":"Mindset & Erfolg"};
+var THEME_Q={"Motivation":["Motivation deutsch","Morgen Motivation","Motivationsrede","Disziplin Motivation"],"Meditation":["Geführte Meditation","Meditation 10 Minuten","Atemübung gegen Stress","Morgen Meditation","Meditation zum Einschlafen"],"Mindset & Erfolg":["Mindset Erfolg","Gewohnheiten ändern","Atomic Habits deutsch","Produktivität Tipps","Finanzielle Freiheit Mindset"]};
+var THEME_KEY={"Motivation":"Motivation deutsch","Meditation":"geführte Meditation deutsch","Mindset & Erfolg":"Mindset Erfolg deutsch"};
+function vTheme(){return THEMES.indexOf(S.vTheme)>=0?S.vTheme:"Motivation"}
+function themeVids(){var t=vTheme();return VLIB.mot.filter(function(v){return (THEME_OF[v.id]||"Motivation")===t})}
 function vOfDay(){return VLIB.mot[bIdx%VLIB.mot.length]}
 
 /* ---------- Navigation ---------- */
@@ -445,7 +462,6 @@ function buildNav(){
   document.getElementById("side").innerHTML='<div class="brand">My<span>Free</span>Vision</div>'+h;
 }
 function go(v){
-  if(tmr){clearInterval(tmr);tmr=null}
   cur=v;try{history.replaceState(null,"","#"+v)}catch(e){}
   buildNav();render();window.scrollTo(0,0);
   var tab=document.querySelector('#tabs [aria-current="page"]');if(tab&&tab.scrollIntoView)tab.scrollIntoView({inline:"center",block:"nearest"});
@@ -532,38 +548,50 @@ R.video=function(){
   var vd=vOfDay(),seen=!!(S.vseen&&S.vseen[today()]);
   return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Jeden Tag ein Impuls-Video. Wechsel täglich um 12:00 Uhr.</p><hr class="hr">'+
   '<div class="card novib vhero"><p class="eyebrow">Video des Tages</p><h2>'+esc(vd.t)+'</h2><p class="muted" style="margin:0">'+esc(vd.ch)+' · '+esc(vd.d)+' Min.</p><button class="vplay" data-act="vplay" data-id="'+vd.id+'" data-slot="day">▶ Abspielen</button><div id="vf-day"></div><label class="check" style="font-size:.95rem;color:var(--text);margin:0"><input type="checkbox" data-act="vday" '+(seen?'checked':'')+'><span class="t">Heute gesehen</span></label>'+YT_NOTE+'</div>'+
-  ytCard({key:"motVids",name:"Motivation",ti:"mtt",ui:"mtu",q:"yq",chips:YT_CHIPS,ph:"z. B. Motivation am Morgen",tph:"z. B. Morgenimpuls"})+
-  '<div class="card novib"><h2>Empfohlene Motivation</h2><div class="vlist">'+VLIB.mot.map(function(v,i){return vItem(v,"m"+i,"motVids")}).join("")+'</div></div>'+
+  '<div class="card novib"><label for="vtsel">Thema</label><select id="vtsel">'+THEMES.map(function(t){return '<option'+(t===vTheme()?' selected':'')+'>'+esc(t)+'</option>'}).join("")+'</select><p class="muted" style="margin-top:.5rem">Gilt für die empfohlenen Videos und die YouTube-Suche.</p></div>'+
+  '<div class="card novib"><h2>Empfohlen: '+esc(vTheme())+'</h2><div class="vlist">'+themeVids().map(function(v,i){return vItem(v,"m"+i,"motVids")}).join("")+'</div>'+YT_NOTE+'</div>'+
+  ytCard({key:"motVids",name:"Video-Coach",ti:"mtt",ui:"mtu",q:"yq",chips:THEME_Q[vTheme()],ph:"z. B. "+THEME_KEY[vTheme()],tph:"z. B. Morgenimpuls",sp:YT_MID,lenNote:"von 4 bis 20 Minuten",topic:"das Thema „"+vTheme()+"“",style:THEME_KEY[vTheme()]})+
   '';
 };
 
 /* ---------- Sport ---------- */
-var sp={name:(S.sportStyle&&WORKOUTS[S.sportStyle])?S.sportStyle:"Ganzkörper",sec:900,run:false};
+var SP_TOTAL=2700,SP_WARM=300,SP_COOL=300,wlock=null;
+var sp={name:(S.sportStyle&&WORKOUTS[S.sportStyle])?S.sportStyle:"Ganzkörper",sec:SP_TOTAL,run:false,end:0};
+function wakeOn(){try{if(navigator.wakeLock)navigator.wakeLock.request("screen").then(function(l){wlock=l}).catch(function(){})}catch(e){}}
+function wakeOff(){try{if(wlock)wlock.release();wlock=null}catch(e){}}
+function spPhase(){
+  if(sp.sec<=0)return "Geschafft";
+  if(!sp.run&&sp.sec===SP_TOTAL)return "Bereit";
+  var el=SP_TOTAL-sp.sec,ex=WORKOUTS[sp.name];
+  if(el<SP_WARM)return "Aufwärmen: locker gehen, Arme kreisen, Schultern lockern";
+  if(sp.sec<=SP_COOL)return "Cool-down: dehnen und ruhig atmen";
+  var m=el-SP_WARM,i=Math.floor(m/60),w=m%60;
+  return w<45?"Jetzt: "+ex[i%ex.length]+" · noch "+(45-w)+" s":"Pause · gleich: "+ex[(i+1)%ex.length];
+}
 R.sport=function(){
   var opts=Object.keys(WORKOUTS).map(function(k){return '<option'+(k===sp.name?' selected':'')+'>'+k+'</option>'}).join("");
-  var v30=styleVids(VLIB.sport30),v45=styleVids(VLIB.sport45),st=esc(sp.name);
-  return '<p class="eyebrow">Modul</p><h1>Sport</h1><p class="muted">15-Minuten-Programm mit Timer, dazu Videos für 30 und 45 Minuten.</p><hr class="hr">'+
-  '<div class="card novib"><label for="wsel">Stil / Ziel</label><select id="wsel">'+opts+'</select><p class="muted" style="margin-top:.5rem">Gilt für den 15-Minuten-Timer, die empfohlenen Videos und die YouTube-Suche.</p></div>'+
-  '<h2 style="margin:1.2rem 0 .3rem">Sport 15 Minuten</h2><p class="muted">Drei Übungen, fünf Runden, je Übung eine Minute. Ohne Geräte.</p>'+
-  '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
-  '<div class="card"><h2>Ablauf · '+st+'</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
-  '<h2 style="margin:1.6rem 0 .3rem">Sport 30 Minuten</h2><p class="muted">Für Tage mit mehr Zeit: Workouts mit Aufwärmen.</p>'+
-  '<div class="card novib"><h2>Empfohlen: 30 Minuten · '+st+'</h2><div class="vlist">'+v30.map(function(v,i){return vItem(v,"t"+i,"sport30Vids")}).join("")+'</div>'+YT_NOTE+'</div>'+
-  ytCard({key:"sport30Vids",name:"Sport 30 Min",ti:"s3t",ui:"s3u",q:"yqs3",chips:styleChips(30),ph:"z. B. "+STYLE_KEY[sp.name],tph:"z. B. Kraft am Wochenende",dur:"30 Minuten",style:STYLE_KEY[sp.name]})+
-  '<h2 style="margin:1.6rem 0 .3rem">Sport 45 Minuten</h2><p class="muted">Ausführliche Einheiten für Kraft, Ausdauer oder Beweglichkeit.</p>'+
+  var v30=styleVids(VLIB.sport30),v45=styleVids(VLIB.sport45),st=esc(sp.name),ex=WORKOUTS[sp.name];
+  return '<p class="eyebrow">Modul</p><h1>Sport</h1><p class="muted">45-Minuten-Training mit Timer, passende Videos für 45 und 30 Minuten.</p><hr class="hr">'+
+  '<div class="card novib"><label for="wsel">Stil / Ziel</label><select id="wsel">'+opts+'</select><p class="muted" style="margin-top:.5rem">Gilt für den Timer, die empfohlenen Videos und die YouTube-Suche.</p></div>'+
+  '<h2 style="margin:1.2rem 0 .3rem">Sport 45 Minuten</h2><p class="muted">5 Minuten Aufwärmen, 35 Minuten Training, 5 Minuten Cool-down. Ohne Geräte.</p>'+
+  '<div class="card novib"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div><p class="muted" style="margin-top:.6rem;text-align:center">Der Timer läuft weiter, wenn Sie in einen anderen Bereich wechseln.</p></div>'+
+  '<div class="card"><h2>Ablauf · '+st+'</h2><ol style="padding-left:1.2rem"><li><b>Aufwärmen</b> · 5 Min: locker gehen, Arme kreisen, Schultern lockern</li><li><b>Training</b> · 35 Min, im Wechsel je 45 s Belastung und 15 s Pause:<ul style="padding-left:1.1rem">'+ex.map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ul></li><li><b>Cool-down</b> · 5 Min: dehnen und ruhig atmen</li></ol><p class="muted">Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
   '<div class="card novib"><h2>Empfohlen: 45 Minuten · '+st+'</h2><div class="vlist">'+v45.map(function(v,i){return vItem(v,"f"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+
-  ytCard({key:"sportVids",name:"Sport 45 Min",ti:"stt",ui:"stu",q:"yqs",chips:styleChips(45),ph:"z. B. "+STYLE_KEY[sp.name],tph:"z. B. Training am Wochenende",dur:"45 Minuten",style:STYLE_KEY[sp.name]})+
+  ytCard({key:"sportVids",name:"Sport 45 Min",ti:"stt",ui:"stu",q:"yqs",chips:styleChips(45),ph:"z. B. "+STYLE_KEY[sp.name],tph:"z. B. Training am Wochenende",dur:"45 Minuten",sp:YT_LONG,lenNote:"über 20 Minuten",topic:"den Stil „"+sp.name+"“",style:STYLE_KEY[sp.name]})+
+  '<h2 style="margin:1.6rem 0 .3rem">Sport 30 Minuten</h2><p class="muted">Für Tage mit weniger Zeit.</p>'+
+  '<div class="card novib"><h2>Empfohlen: 30 Minuten · '+st+'</h2><div class="vlist">'+v30.map(function(v,i){return vItem(v,"t"+i,"sport30Vids")}).join("")+'</div>'+YT_NOTE+'</div>'+
+  ytCard({key:"sport30Vids",name:"Sport 30 Min",ti:"s3t",ui:"s3u",q:"yqs3",chips:styleChips(30),ph:"z. B. "+STYLE_KEY[sp.name],tph:"z. B. kurze Einheit",dur:"30 Minuten",sp:YT_LONG,lenNote:"über 20 Minuten",topic:"den Stil „"+sp.name+"“",style:STYLE_KEY[sp.name]})+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
 function drawTimer(){
   var t=document.getElementById("wtime");if(!t)return;
-  var m=Math.floor(sp.sec/60),s=sp.sec%60;t.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-  var ex=WORKOUTS[sp.name],idx=Math.floor((900-sp.sec)/60)%ex.length;if(sp.sec===0)idx=0;
-  document.getElementById("wnow").textContent=sp.sec===0?"Geschafft":(sp.sec===900&&!sp.run?"Bereit":"Jetzt: "+ex[idx]);
+  var m=Math.floor(sp.sec/60),x=sp.sec%60;t.textContent=String(m).padStart(2,"0")+":"+String(x).padStart(2,"0");
+  var n=document.getElementById("wnow");if(n)n.textContent=spPhase();
   var b=document.getElementById("wbtn");if(b)b.textContent=sp.run?"Pause":"Start";
 }
-function wtick(){sp.sec--;if(sp.sec<=0){sp.sec=0;sp.run=false;clearInterval(tmr);tmr=null;S.sport[today()]=true;save();toast("15 Minuten geschafft.")}drawTimer()}
+function wtick(){if(!sp.run)return;sp.sec=Math.max(0,Math.ceil((sp.end-Date.now())/1000));if(sp.sec<=0){sp.sec=0;sp.run=false;clearInterval(tmr);tmr=null;wakeOff();S.sport[today()]=true;save();toast("45 Minuten geschafft.");if(cur==="sport"||cur==="dash")render()}drawTimer()}
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&sp.run){wtick();wakeOn()}});
 
 /* ---------- Ernährung ---------- */
 R.food=function(){
@@ -687,8 +715,8 @@ var A={
  vidadd:function(){var t=val("vtt");if(!t)return toast("Bitte einen Titel eingeben.");var u=val("vtu");if(u&&!safeUrl(u))return toast("Der Link ist ungültig.");S.videos.push({id:uid(),t:t,url:u,d:false});save();render()},
  vtoggle:function(e){by(S.videos,e.dataset.id).d=e.checked;save();render()},
  vdel2:function(e){S.videos=S.videos.filter(function(v){return v.id!==e.dataset.id});save();render()},
- wstart:function(){if(sp.run){sp.run=false;clearInterval(tmr);tmr=null}else{if(sp.sec<=0)sp.sec=900;sp.run=true;tmr=setInterval(wtick,1000)}drawTimer()},
- wreset:function(){sp.run=false;sp.sec=900;if(tmr){clearInterval(tmr);tmr=null}drawTimer()},
+ wstart:function(){if(sp.run){wtick();sp.run=false;clearInterval(tmr);tmr=null;wakeOff()}else{if(sp.sec<=0)sp.sec=SP_TOTAL;sp.end=Date.now()+sp.sec*1000;sp.run=true;if(tmr)clearInterval(tmr);tmr=setInterval(wtick,1000);wakeOn()}drawTimer()},
+ wreset:function(){sp.run=false;sp.sec=SP_TOTAL;if(tmr){clearInterval(tmr);tmr=null}wakeOff();drawTimer()},
  wdone:function(){if(S.sport[today()])delete S.sport[today()];else S.sport[today()]=true;save();render()},
  fshop:function(e){var m=FOOD.meals[+e.dataset.i];m.i.forEach(function(n){if(!S.shop.some(function(s){return s.t===n&&!s.d}))S.shop.push({id:uid(),t:n,d:false})});save();toast("Zutaten hinzugefügt.")},
  sadd:function(){var t=val("si");if(!t)return;S.shop.push({id:uid(),t:t,d:false});save();render();var i=$("si");if(i)i.focus()},
@@ -716,11 +744,12 @@ document.addEventListener("submit",function(ev){
   var f=ev.target;if(!f.dataset||!f.dataset.yt)return;ev.preventDefault();
   var inp=f.querySelector("input"),q=inp?inp.value.trim():"";if(!q&&f.dataset.style)q=f.dataset.style;if(!q)return toast("Bitte einen Suchbegriff eingeben.");if(f.dataset.dur&&!/\d+\s*min/i.test(q))q+=" "+f.dataset.dur;
   if(!navigator.onLine)return toast("Keine Internetverbindung. Die YouTube-Suche braucht Internet.");
-  var a=document.createElement("a");a.href=ytSearchUrl(q,!!f.dataset.long);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
+  var a=document.createElement("a");a.href=ytSearchUrl(q,f.dataset.sp);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
 });
 document.addEventListener("change",function(ev){
   var el=ev.target;
-  if(el.id==="wsel"){sp.name=el.value;S.sportStyle=sp.name;save();sp.sec=900;sp.run=false;if(tmr){clearInterval(tmr);tmr=null}render();return}
+  if(el.id==="vtsel"){S.vTheme=el.value;save();render();return}
+  if(el.id==="wsel"){sp.name=el.value;S.sportStyle=sp.name;save();render();return}
   if(el.id==="imp"&&el.files[0]){
     var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||typeof o!=="object"||!Array.isArray(o.vision)||!Array.isArray(o.habits))throw 0;if(!confirm("Aktuelle Daten durch die Sicherung ersetzen?"))return;S=o;for(var k in DEFAULT)if(!(k in S))S[k]=JSON.parse(JSON.stringify(DEFAULT[k]));save();render();toast("Sicherung eingespielt.")}catch(e){toast("Datei ist keine gültige Sicherung.")}};r.readAsText(el.files[0]);return}
   var a=el.dataset&&el.dataset.act;
