@@ -184,13 +184,13 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.6";
+var APP_VERSION="5.7";
 var APP_URL="https://ddnnews.github.io/myfreevision/";
 function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
 function chromeUrl(){return isIOS()?"googlechromes://"+APP_URL.replace(/^https:\/\//,""):APP_URL}
 var APP_FILES=["index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","version.json"];
 var updAvail=null;
-var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
+var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
 var DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
 
 var DEFAULT={
@@ -339,6 +339,15 @@ var VLIB={
   {id:"wcG-duYAdYM",t:"Disziplin entwickeln in 7 Schritten",ch:"Henry Hildebrandt",d:"13:44"},
   {id:"Mix5JOgYTuQ",t:"Eine der besten Motivationsreden",ch:"Oscar Karem",d:"13:25"}
  ],
+ sport45:[
+  {id:"cDq-nFmD0rI",t:"45 Min Ganzkörpertraining",ch:"Rowan Row",d:"46:38"},
+  {id:"J3Wv3Els3fk",t:"45 Min Ganzkörper, ohne Springen",ch:"Rowan Row",d:"46:10"},
+  {id:"MOrRRvSGIQc",t:"45 Min Ganzkörper ohne Geräte",ch:"Rowan Row",d:"41:57"},
+  {id:"NBL4ixJ75hM",t:"Pilates für Anfänger, Ganzkörper",ch:"Lena's Health Lab",d:"46:52"},
+  {id:"0Csrx8r6FAs",t:"Yoga Ganzkörper-Flow mit Stretch",ch:"Mady Morrison",d:"45:00"},
+  {id:"hB7ob9X5BGc",t:"Yoga für einen starken Rücken",ch:"Mady Morrison",d:"44:38"},
+  {id:"_eFmBrrCVEM",t:"Yin Yoga für Hüften und unteren Rücken",ch:"Mady Morrison",d:"47:07"}
+ ],
  sport30:[
   {id:"T2lyoAhcnXI",t:"30 Min Ganzkörper ohne Geräte",ch:"Sascha Huber",d:"33:42"},
   {id:"C19KinNxrBs",t:"30 Min Ganzkörper, ohne Springen",ch:"Paulina Wallner",d:"31:08"},
@@ -388,8 +397,9 @@ function ytCard(c){
   (full?'<p class="muted">Alle 5 Plätze sind belegt. Löschen Sie ein Video, um ein neues zu speichern.</p>':'')+
   '<button class="primary" data-act="ladd" data-list="'+c.key+'" data-ti="'+c.ti+'" data-ui="'+c.ui+'"'+(full?' disabled':'')+'>Video speichern</button></div>'+
   '<p class="eyebrow" style="margin-top:1.2rem">Auf YouTube suchen</p>'+
-  '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="'+c.q+'">Suchbegriff für YouTube</label><input id="'+c.q+'" type="search" maxlength="100" placeholder="'+c.ph+'" enterkeyhint="search"><button type="submit">Suchen</button></form>'+
-  '<div class="chips">'+c.chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  '<form class="ytbar" data-yt="1"'+(c.dur?' data-dur="'+c.dur+'" data-long="1"':'')+' role="search"><label class="sr-only" for="'+c.q+'">Suchbegriff für YouTube</label><input id="'+c.q+'" type="search" maxlength="100" placeholder="'+c.ph+'" enterkeyhint="search"><button type="submit">Suchen</button></form>'+
+  '<div class="chips">'+c.chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q,!!c.dur)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  (c.dur?'<p class="muted">Die Suche ist auf die Länge abgestimmt: Sie ergänzt „'+c.dur+'“ und zeigt bei YouTube nur Videos über 20 Minuten.</p>':'')+
   '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann oben bei „YouTube-Link“ einfügen und speichern.</p>'+
   '<p class="muted"><span class="tag ext">Extern: YouTube</span> Konto, Suche und Videos laufen bei YouTube (Google) und brauchen Internet.</p></div>';
 }
@@ -398,6 +408,8 @@ function ytId(u){u=String(u||"");var m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/
 var YT_CHIPS=["Motivation deutsch","Morgenroutine","15 Min Workout ohne Geräte","Rücken Übungen","Meditation Morgen","Finanzielle Freiheit","Produktivität","Remote arbeiten und reisen"];
 var YT_CHIPS_SPORT=["15 Min Workout ohne Geräte","HIIT 15 Minuten","Workout ohne Springen","Bauch Workout 10 Minuten","Rücken Übungen","Mobility Routine","Yoga für Anfänger","Dehnen nach dem Sport"];
 var SPORT_MAX=5;
+var YT_CHIPS_SPORT45=["45 Min Ganzkörper Workout","45 Min Workout ohne Springen","45 Min Pilates","45 Min Krafttraining zuhause","45 Min HIIT","45 Min Yoga Flow","45 Min Yoga Rücken","45 Min Yin Yoga"];
+var YT_LONG="EgIYAg%3D%3D";
 var YT_CHIPS_SPORT30=["30 Min Ganzkörper Workout","30 Min HIIT ohne Geräte","30 Min Workout ohne Springen","30 Min Muskelaufbau zuhause","30 Min Yoga Flow","30 Min Rücken Yoga","30 Min Mobility","30 Min Dehnen"];
 function ytSearchCard(id,title,intro,chips,ph){
   return '<div class="card novib"><h2>'+title+'</h2><p class="muted">'+intro+'</p>'+
@@ -405,7 +417,7 @@ function ytSearchCard(id,title,intro,chips,ph){
   '<div class="chips">'+chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
   '<p style="margin:.2rem 0 .6rem"><a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube öffnen</a></p>';
 }
-function ytSearchUrl(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)}
+function ytSearchUrl(q,long){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)+(long?"&sp="+YT_LONG:"")}
 function vOfDay(){return VLIB.mot[bIdx%VLIB.mot.length]}
 
 /* ---------- Navigation ---------- */
@@ -512,14 +524,17 @@ R.video=function(){
 var sp={name:"Ganzkörper",sec:900,run:false};
 R.sport=function(){
   var opts=Object.keys(WORKOUTS).map(function(k){return '<option'+(k===sp.name?' selected':'')+'>'+k+'</option>'}).join("");
-  return '<p class="eyebrow">Modul</p><h1>15-Minuten-Sport</h1><p class="muted">Drei Übungen, fünf Runden, je Übung eine Minute. Ohne Geräte.</p><hr class="hr">'+
+  return '<p class="eyebrow">Modul</p><h1>Sport</h1><p class="muted">15-Minuten-Programm mit Timer, dazu Videos für 30 und 45 Minuten.</p><hr class="hr">'+
+  '<h2 style="margin:0 0 .3rem">Sport 15 Minuten</h2><p class="muted">Drei Übungen, fünf Runden, je Übung eine Minute. Ohne Geräte.</p>'+
   '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
   '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
   '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
-  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+ytCard({key:"sportVids",name:"Sport 15 Min",ti:"stt",ui:"stu",q:"yqs",chips:YT_CHIPS_SPORT,ph:"z. B. 15 Min Ganzkörper",tph:"z. B. Rücken am Morgen"})+
   '<h2 style="margin:1.6rem 0 .3rem">Sport 30 Minuten</h2><p class="muted">Für Tage mit mehr Zeit: längere Workouts mit Aufwärmen, Kraft, HIIT oder Yoga.</p>'+
   '<div class="card novib"><h2>Empfohlen: 30 Minuten</h2><div class="vlist">'+VLIB.sport30.map(function(v,i){return vItem(v,"t"+i,"sport30Vids")}).join("")+'</div>'+YT_NOTE+'</div>'+
-  ytCard({key:"sport30Vids",name:"Sport 30 Min",ti:"s3t",ui:"s3u",q:"yqs3",chips:YT_CHIPS_SPORT30,ph:"z. B. 30 Min Ganzkörper",tph:"z. B. Kraft am Wochenende"})+
+  ytCard({key:"sport30Vids",name:"Sport 30 Min",ti:"s3t",ui:"s3u",q:"yqs3",chips:YT_CHIPS_SPORT30,ph:"z. B. Ganzkörper",tph:"z. B. Kraft am Wochenende",dur:"30 Minuten"})+
+  '<h2 style="margin:1.6rem 0 .3rem">Sport 45 Minuten</h2><p class="muted">Ausführliche Einheiten für den ganzen Körper, Pilates oder Yoga.</p>'+
+  '<div class="card novib"><h2>Empfohlen: 45 Minuten</h2><div class="vlist">'+VLIB.sport45.map(function(v,i){return vItem(v,"f"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+
+  ytCard({key:"sportVids",name:"Sport 45 Min",ti:"stt",ui:"stu",q:"yqs",chips:YT_CHIPS_SPORT45,ph:"z. B. Ganzkörper",tph:"z. B. Training am Wochenende",dur:"45 Minuten"})+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
@@ -631,7 +646,7 @@ var A={
  ssave:function(e){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var v=VLIB.sport["Ganzkörper"].concat(VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]).filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.sportVids.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sadd2:function(){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var u=val("stu"),id=ytId(u);if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(S.sportVids.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");S.sportVids.push({id:uid(),t:val("stt")||"Sport-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sdel2:function(e){S.sportVids=(S.sportVids||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
- lsave:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"],VLIB.sport30);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;L.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
+ lsave:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"],VLIB.sport30,VLIB.sport45);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;L.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
  ladd:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var id=ytId(val(e.dataset.ui));if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(L.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");L.push({id:uid(),t:val(e.dataset.ti)||"YouTube-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
  ldel:function(e){var k=e.dataset.list;S[k]=(S[k]||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
  vsave:function(e){var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.videos.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id),d:false});save();render();toast("In Ihre Videoliste übernommen.")},
@@ -681,9 +696,9 @@ document.addEventListener("click",function(ev){
 });
 document.addEventListener("submit",function(ev){
   var f=ev.target;if(!f.dataset||!f.dataset.yt)return;ev.preventDefault();
-  var inp=f.querySelector("input"),q=inp?inp.value.trim():"";if(!q)return toast("Bitte einen Suchbegriff eingeben.");
+  var inp=f.querySelector("input"),q=inp?inp.value.trim():"";if(!q)return toast("Bitte einen Suchbegriff eingeben.");if(f.dataset.dur&&!/\d+\s*min/i.test(q))q+=" "+f.dataset.dur;
   if(!navigator.onLine)return toast("Keine Internetverbindung. Die YouTube-Suche braucht Internet.");
-  var a=document.createElement("a");a.href=ytSearchUrl(q);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
+  var a=document.createElement("a");a.href=ytSearchUrl(q,!!f.dataset.long);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
 });
 document.addEventListener("change",function(ev){
   var el=ev.target;
