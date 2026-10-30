@@ -156,6 +156,11 @@ html.calm .postit,html.calm .card{animation:none!important}
 .vframe{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--text);margin:.6rem 0}
 .vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .card.novib{animation:none!important}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:.3rem .8rem;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:.82rem;text-decoration:none}
+.chip:hover{border-color:var(--accent)}
+.ytbar{display:flex;gap:.5rem;flex-wrap:wrap}
+.ytbar input{flex:1;min-width:0;flex-basis:180px}
 .vhero{display:flex;flex-direction:column;gap:.4rem}
 .vhero .vplay{width:100%;height:auto;min-height:52px;font-family:var(--sans);font-size:.95rem;font-weight:600}
 html.calm .ticker{white-space:normal;overflow:visible;text-align:center;padding:.5rem .8rem}
@@ -179,7 +184,7 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.1";
+var APP_VERSION="5.2";
 var APP_FILES=["index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","version.json"];
 var updAvail=null;
 var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
@@ -357,6 +362,9 @@ function vItem(v,slot){
   return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inList?'<span>In meiner Liste</span>':'<button data-act="vsave" data-id="'+v.id+'">In meine Liste</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';
 }
 var YT_NOTE='<p class="muted"><span class="tag ext">Extern: YouTube</span> Das Video lädt erst, wenn Sie auf ▶ tippen. Dann überträgt YouTube (Google) Daten wie Ihre IP-Adresse. Dafür ist Internet nötig.</p>';
+function ytId(u){u=String(u||"");var m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:""}
+var YT_CHIPS=["Motivation deutsch","Morgenroutine","15 Min Workout ohne Geräte","Rücken Übungen","Meditation Morgen","Finanzielle Freiheit","Produktivität","Remote arbeiten und reisen"];
+function ytSearchUrl(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)}
 function vOfDay(){return VLIB.mot[bIdx%VLIB.mot.length]}
 
 /* ---------- Navigation ---------- */
@@ -450,13 +458,19 @@ R.morning=function(){
 /* ---------- Video-Coach ---------- */
 R.video=function(){
   var topics=VIDEO_TOPICS.map(function(t){return '<div class="card"><h3>'+esc(t[0])+'</h3><p class="muted">'+esc(t[1])+'</p></div>'}).join("");
-  var list=S.videos.map(function(v){var u=safeUrl(v.url);return '<div class="check'+(v.d?' done':'')+'"><input type="checkbox" '+(v.d?'checked':'')+' data-act="vtoggle" data-id="'+v.id+'" aria-label="Video gesehen"><span class="t">'+esc(v.t)+'</span>'+(u?'<a class="btn small" style="min-height:36px" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Öffnen</a>':'')+'<button class="x" data-act="vdel2" data-id="'+v.id+'" aria-label="Video löschen">×</button></div>'}).join("");
+  var list=S.videos.map(function(v){var u=safeUrl(v.url);return '<div class="check'+(v.d?' done':'')+'"><input type="checkbox" '+(v.d?'checked':'')+' data-act="vtoggle" data-id="'+v.id+'" aria-label="Video gesehen"><span class="t">'+esc(v.t)+'</span>'+(ytId(u)?'<button class="small" data-act="vplay" data-id="'+ytId(u)+'" data-slot="u'+v.id+'" aria-label="'+esc(v.t)+' in der App abspielen">▶</button>':'')+(u?'<a class="btn small" style="min-height:36px" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Öffnen</a>':'')+'<button class="x" data-act="vdel2" data-id="'+v.id+'" aria-label="Video löschen">×</button></div><div id="vf-u'+v.id+'"></div>'}).join("");
   var vd=vOfDay(),seen=!!(S.vseen&&S.vseen[today()]);
   return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Jeden Tag ein Impuls-Video. Wechsel täglich um 12:00 Uhr.</p><hr class="hr">'+
   '<div class="card novib vhero"><p class="eyebrow">Video des Tages</p><h2>'+esc(vd.t)+'</h2><p class="muted" style="margin:0">'+esc(vd.ch)+' · '+esc(vd.d)+' Min.</p><button class="vplay" data-act="vplay" data-id="'+vd.id+'" data-slot="day">▶ Abspielen</button><div id="vf-day"></div><label class="check" style="font-size:.95rem;color:var(--text);margin:0"><input type="checkbox" data-act="vday" '+(seen?'checked':'')+'><span class="t">Heute gesehen</span></label>'+YT_NOTE+'</div>'+
   '<div class="card novib"><h2>Motivation</h2><div class="vlist">'+VLIB.mot.map(function(v,i){return vItem(v,"m"+i)}).join("")+'</div></div>'+
+  '<div class="card novib"><h2>YouTube durchsuchen</h2><p class="muted">Ergänzend zur Auswahl: Suchen Sie selbst nach weiteren Videos. Die Suche öffnet YouTube in der YouTube-App oder im Browser.</p>'+
+  '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="yq">Suchbegriff für YouTube</label><input id="yq" type="search" maxlength="100" placeholder="z. B. Motivation am Morgen" enterkeyhint="search"><button class="primary" type="submit">Auf YouTube suchen</button></form>'+
+  '<div class="chips">'+YT_CHIPS.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  '<p style="margin:.2rem 0 .6rem"><a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube öffnen</a></p>'+
+  '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann unten bei „Video hinzufügen“ einfügen. YouTube-Videos aus Ihrer Liste spielen Sie mit ▶ direkt hier in der App ab.</p>'+
+  '<p class="muted"><span class="tag ext">Extern: YouTube</span> Die Suche läuft bei YouTube (Google) und braucht Internet.</p></div>'+
   '<div class="card"><h2>Meine Videoliste</h2>'+(list||'<p class="muted">Noch keine Videos. Füge unten einen Link hinzu.</p>')+'</div>'+
-  '<div class="card"><h2>Video hinzufügen</h2><div class="stack"><div><label for="vtt">Titel</label><input id="vtt" maxlength="90"></div><div><label for="vtu">Link (z. B. YouTube)</label><input id="vtu" type="url" inputmode="url" placeholder="https://"></div><button class="primary" data-act="vidadd">Speichern</button><p class="muted">Videos öffnen sich im neuen Tab bei einem externen Anbieter. Dafür ist eine Internetverbindung nötig.</p></div></div>'+
+  '<div class="card"><h2>Video hinzufügen</h2><div class="stack"><div><label for="vtt">Titel</label><input id="vtt" maxlength="90"></div><div><label for="vtu">Link (z. B. YouTube)</label><div class="ytbar"><input id="vtu" type="url" inputmode="url" placeholder="https://"><button type="button" data-act="vpaste">Link einfügen</button></div></div><button class="primary" data-act="vidadd">Speichern</button><p class="muted">Videos öffnen sich im neuen Tab bei einem externen Anbieter. Dafür ist eine Internetverbindung nötig.</p></div></div>'+
   '';
 };
 
@@ -562,6 +576,7 @@ function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]
 var A={
  nav:function(e){go(e.dataset.v)},
  appupd:function(){appUpdate()},
+ vpaste:function(){var f=$("vtu");if(!navigator.clipboard||!navigator.clipboard.readText){if(f)f.focus();return toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")}navigator.clipboard.readText().then(function(t){if(f){f.value=String(t||"").trim();if(!val("vtt")&&ytId(f.value))$("vtt").value="YouTube-Video";f.focus()}}).catch(function(){if(f)f.focus();toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")})},
  vplay:function(e){
   var box=$("vf-"+e.dataset.slot);if(!box)return;
   if(!navigator.onLine)return toast("Keine Internetverbindung. Das Video braucht Internet.");
@@ -614,6 +629,12 @@ document.addEventListener("click",function(ev){
   if(el.tagName==="TEXTAREA")return;
   if(A[a])A[a](el);
 });
+document.addEventListener("submit",function(ev){
+  var f=ev.target;if(!f.dataset||!f.dataset.yt)return;ev.preventDefault();
+  var q=val("yq");if(!q)return toast("Bitte einen Suchbegriff eingeben.");
+  if(!navigator.onLine)return toast("Keine Internetverbindung. Die YouTube-Suche braucht Internet.");
+  var a=document.createElement("a");a.href=ytSearchUrl(q);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
+});
 document.addEventListener("change",function(ev){
   var el=ev.target;
   if(el.id==="wsel"){sp.name=el.value;sp.sec=900;sp.run=false;if(tmr){clearInterval(tmr);tmr=null}render();return}
@@ -624,7 +645,7 @@ document.addEventListener("change",function(ev){
   if(el.type==="checkbox"&&a&&A[a])A[a](el);
 });
 document.addEventListener("input",function(ev){var el=ev.target;if(el.dataset&&el.dataset.act==="wk"){S.week[el.dataset.d]=el.value;save()}});
-document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.tagName==="INPUT"&&ev.target.type!=="checkbox"&&ev.target.type!=="file"){var btn=ev.target.closest(".card");if(btn){var p=btn.querySelector("button.primary,button[data-act='madd']");if(p)p.click()}}});
+document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.tagName==="INPUT"&&!ev.target.form&&ev.target.type!=="checkbox"&&ev.target.type!=="file"){var btn=ev.target.closest(".card");if(btn){var p=btn.querySelector("button.primary,button[data-act='madd']");if(p)p.click()}}});
 
 var h=location.hash.replace("#","");if(VIEWS.some(function(v){return v[0]===h}))cur=h;
 buildNav();render();drawBanner();
