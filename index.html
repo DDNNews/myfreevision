@@ -184,7 +184,10 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.3";
+var APP_VERSION="5.4";
+var APP_URL="https://ddnnews.github.io/myfreevision/";
+function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
+function chromeUrl(){return isIOS()?"googlechromes://"+APP_URL.replace(/^https:\/\//,""):APP_URL}
 var APP_FILES=["index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","version.json"];
 var updAvail=null;
 var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
@@ -425,7 +428,7 @@ R.dash=function(){
   '<div class="card"><p class="eyebrow">Ziele gesamt</p><p class="big">'+allGoalsPct()+' %</p><p class="muted">'+open+' offene Meilensteine</p></div>'+
   '<div class="card"><p class="eyebrow">Sport</p><p class="big">'+streak(S.sport)+' Tage</p><p class="muted">'+(S.sport[today()]?"Heute erledigt":"Heute noch offen")+' (Serie)</p></div>'+
   '</div><div class="card"><h2>Wasser, letzte 7 Tage</h2><div class="bars">'+bars+'</div></div>'+
-  '<div class="card"><h3>Heutiger Fokus</h3><p>'+esc(S.focus[today()]||"Noch nicht gesetzt.")+'</p><button data-act="nav" data-v="morning">Zur Morgenmotivation</button></div>';
+  '<div class="card"><h3>Heutiger Fokus</h3><p>'+esc(S.focus[today()]||"Noch nicht gesetzt.")+'</p><button data-act="nav" data-v="morning">Zur Morgenmotivation</button></div>'+appCard();
 };
 
 /* ---------- Vision Board ---------- */
@@ -557,7 +560,7 @@ R.habits=function(){
 /* ---------- Daten / Sicherung ---------- */
 R.data=function(){
   return '<p class="eyebrow">Einstellungen</p><h1>Daten und Sicherung</h1><p class="muted">Alle Daten liegen nur in diesem Browser auf diesem Gerät. Sie werden nicht übertragen.</p><hr class="hr">'+
-  '<div class="card"><h2>App-Version</h2><p>Version <b>'+APP_VERSION+'</b>. Die App läuft ohne Internet mit der gespeicherten Version. Neue Versionen holen Sie hier, sobald Sie online sind.</p>'+(updAvail?'<p><span class="tag">Neu</span> Version '+esc(updAvail)+' ist verfügbar.</p>':'')+'<button class="primary" data-act="appupd">Nach Update suchen</button></div>'+
+  appCard()+
   '<div class="card"><h2>Sicherungskopie</h2><p>Speichere regelmäßig eine Sicherung, besonders vor dem Löschen von Browserdaten. Mac und iPhone synchronisieren nicht automatisch; über die Sicherungsdatei kannst du Daten übertragen.</p><div class="row"><button class="primary" data-act="export">Sicherung herunterladen</button><button data-act="import">Sicherung einspielen</button></div><input type="file" id="imp" accept="application/json,.json" hidden></div>'+
   '<div class="card"><h2>Bewegung</h2><p>Post-its, Karten und Laufband bewegen sich leicht. Bei Bedarf lässt sich das abschalten. Die Einstellung "Bewegung reduzieren" Ihres Geräts wird ebenfalls beachtet.</p><button data-act="calm" aria-pressed="'+!!S.calm+'">'+(S.calm?'Bewegung einschalten':'Bewegung ausschalten')+'</button></div>'+
   '<div class="card"><h2>Externe Dienste</h2><p><span class="tag ext">Extern</span> Video-Links öffnen Seiten externer Anbieter.</p><p><span class="tag ext">KI-API nötig</span> Personalisierte KI-Texte sind nicht aktiv.</p></div>'+
@@ -565,18 +568,24 @@ R.data=function(){
 };
 
 /* ---------- App-Update (offline zuerst) ---------- */
+function appCard(){
+  return '<div class="card novib"><h2>App aktualisieren</h2><p>Version <b>'+APP_VERSION+'</b>. Die App läuft ohne Internet mit der gespeicherten Version.</p>'+(updAvail?'<p><span class="tag">Neu</span> Version '+esc(updAvail)+' ist verfügbar.</p>':'')+
+  '<div class="row"><button class="primary" data-act="appforce">Neueste Version laden</button><a class="btn" href="'+chromeUrl()+'" target="_blank" rel="noopener noreferrer">In Chrome öffnen</a></div>'+
+  '<p class="muted" style="margin-top:.6rem">„Neueste Version laden“ holt mit Internet die aktuelle Version von '+APP_URL.replace(/^https:\/\//,"").replace(/\/$/,"")+' und startet die App neu. Ihre Daten bleiben erhalten. „In Chrome öffnen“ zeigt die Web-Version in Chrome.</p></div>';
+}
+
 function canUpdate(){return "serviceWorker" in navigator&&"caches" in window&&/^https?:$/.test(location.protocol)}
 function fetchVersion(){return fetch("version.json?u="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){return String(j.v||"")})}
 function checkUpdateQuiet(){
   if(!canUpdate()||!navigator.onLine)return;
   fetchVersion().then(function(v){if(v&&v!==APP_VERSION){updAvail=v;if(cur==="dash"||cur==="data")render()}}).catch(function(){});
 }
-function appUpdate(){
+function appUpdate(force){
   if(!canUpdate())return toast("Updates gibt es nur in der installierten App.");
   if(!navigator.onLine)return toast("Keine Internetverbindung. Die App läuft weiter mit Version "+APP_VERSION+".");
   toast("Suche nach Update …");
   fetchVersion().then(function(v){
-    if(v===APP_VERSION&&!updAvail){toast("Sie haben die neueste Version ("+APP_VERSION+").");return}
+    if(!force&&v===APP_VERSION&&!updAvail){toast("Sie haben die neueste Version ("+APP_VERSION+").");return}
     var t=Date.now();
     return caches.open("myfreevision").then(function(c){
       return Promise.all(APP_FILES.map(function(f){
@@ -598,6 +607,7 @@ function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]
 var A={
  nav:function(e){go(e.dataset.v)},
  appupd:function(){appUpdate()},
+ appforce:function(){appUpdate(true)},
  vpaste:function(e){var fi=(e&&e.dataset.in)||"vtu",ti=(e&&e.dataset.ti)||"vtt";var f=$(fi);if(!navigator.clipboard||!navigator.clipboard.readText){if(f)f.focus();return toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")}navigator.clipboard.readText().then(function(t){if(f){f.value=String(t||"").trim();if(!val(ti)&&ytId(f.value))$(ti).value="YouTube-Video";f.focus()}}).catch(function(){if(f)f.focus();toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")})},
  vplay:function(e){
   var box=$("vf-"+e.dataset.slot);if(!box)return;
