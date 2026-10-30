@@ -184,7 +184,7 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.2";
+var APP_VERSION="5.3";
 var APP_FILES=["index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","version.json"];
 var updAvail=null;
 var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
@@ -201,7 +201,7 @@ var DEFAULT={
   ],
   goals:[],quotes:[],videos:[],week:{},shop:[],
   notes:["Mut","Fokus","Ruhe","Freiheit","Disziplin","Dankbarkeit","Klarheit","Energie","Geduld","Wachstum","Vertrauen","Leichtigkeit","Schritt für Schritt","Jetzt handeln"].map(function(t,i){return{id:"n"+(i+1),t:t,pin:false}}),
-  calm:false,vseen:{},
+  calm:false,vseen:{},sportVids:[],
   water:{},waterGoal:8,waterMl:250,focus:{},sport:{},
   habits:[{id:"h1",t:"Morgenmotivation lesen",log:{}},{id:"h2",t:"15 Minuten Bewegung",log:{}},{id:"h3",t:"Wasserziel erreichen",log:{}}]
 };
@@ -357,13 +357,23 @@ var VLIB={
  }
 };
 function ytWatch(id){return "https://www.youtube.com/watch?v="+id}
-function vItem(v,slot){
+function vItem(v,slot,target){
+  if(target==="sport"){var inS=(S.sportVids||[]).some(function(x){return ytId(x.url)===v.id});
+    return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inS?'<span>In meinen Sport-Videos</span>':'<button data-act="ssave" data-id="'+v.id+'">Speichern</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';}
   var inList=S.videos.some(function(x){return x.url===ytWatch(v.id)});
   return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inList?'<span>In meiner Liste</span>':'<button data-act="vsave" data-id="'+v.id+'">In meine Liste</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';
 }
 var YT_NOTE='<p class="muted"><span class="tag ext">Extern: YouTube</span> Das Video lädt erst, wenn Sie auf ▶ tippen. Dann überträgt YouTube (Google) Daten wie Ihre IP-Adresse. Dafür ist Internet nötig.</p>';
 function ytId(u){u=String(u||"");var m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:""}
 var YT_CHIPS=["Motivation deutsch","Morgenroutine","15 Min Workout ohne Geräte","Rücken Übungen","Meditation Morgen","Finanzielle Freiheit","Produktivität","Remote arbeiten und reisen"];
+var YT_CHIPS_SPORT=["15 Min Workout ohne Geräte","HIIT 15 Minuten","Workout ohne Springen","Bauch Workout 10 Minuten","Rücken Übungen","Mobility Routine","Yoga für Anfänger","Dehnen nach dem Sport"];
+var SPORT_MAX=5;
+function ytSearchCard(id,title,intro,chips,ph){
+  return '<div class="card novib"><h2>'+title+'</h2><p class="muted">'+intro+'</p>'+
+  '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="'+id+'">Suchbegriff für YouTube</label><input id="'+id+'" type="search" maxlength="100" placeholder="'+ph+'" enterkeyhint="search"><button class="primary" type="submit">Auf YouTube suchen</button></form>'+
+  '<div class="chips">'+chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  '<p style="margin:.2rem 0 .6rem"><a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube öffnen</a></p>';
+}
 function ytSearchUrl(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)}
 function vOfDay(){return VLIB.mot[bIdx%VLIB.mot.length]}
 
@@ -482,7 +492,7 @@ R.sport=function(){
   '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
   '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
   '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
-  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i)}).join("")+'</div>'+YT_NOTE+'</div>'+
+  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sport")}).join("")+'</div>'+YT_NOTE+'</div>'+sportMine()+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
@@ -494,6 +504,18 @@ function drawTimer(){
   var b=document.getElementById("wbtn");if(b)b.textContent=sp.run?"Pause":"Start";
 }
 function wtick(){sp.sec--;if(sp.sec<=0){sp.sec=0;sp.run=false;clearInterval(tmr);tmr=null;S.sport[today()]=true;save();toast("15 Minuten geschafft.")}drawTimer()}
+
+function sportMine(){
+  var L=S.sportVids||[],full=L.length>=SPORT_MAX;
+  var items=L.map(function(v){var id=ytId(v.url),u=safeUrl(v.url);return '<div class="vitem">'+(id?'<button class="vplay" data-act="vplay" data-id="'+id+'" data-slot="p'+v.id+'" aria-label="'+esc(v.t)+' abspielen">▶</button>':'')+'<div class="vmeta"><b>'+esc(v.t)+'</b><div class="vlinks">'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>':'')+'<button data-act="sdel2" data-id="'+v.id+'" aria-label="'+esc(v.t)+' löschen">Löschen</button></div></div></div><div id="vf-p'+v.id+'"></div>'}).join("");
+  return '<div class="card novib"><div class="row between"><h2 style="margin:0">Meine Sport-Videos</h2><span class="tag">'+L.length+' / '+SPORT_MAX+'</span></div>'+
+  (items?'<div class="vlist">'+items+'</div>':'<p class="muted" style="margin-top:.5rem">Noch keine eigenen Sport-Videos. Speichern Sie bis zu 5 Videos aus der Auswahl oben oder aus der YouTube-Suche.</p>')+'</div>'+
+  ytSearchCard("yqs","YouTube durchsuchen","Weitere Workouts finden. Die Suche öffnet YouTube in der App oder im Browser.",YT_CHIPS_SPORT,"z. B. 15 Min Ganzkörper")+
+  '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann hier einfügen und speichern.</p>'+
+  '<div class="stack"><div><label for="stt">Titel</label><input id="stt" maxlength="90" placeholder="z. B. Rücken am Morgen"></div><div><label for="stu">YouTube-Link</label><div class="ytbar"><input id="stu" type="url" inputmode="url" placeholder="https://"><button type="button" data-act="vpaste" data-in="stu" data-ti="stt">Link einfügen</button></div></div>'+
+  (full?'<p class="muted">Alle 5 Plätze sind belegt. Löschen Sie oben ein Video, um ein neues zu speichern.</p>':'')+
+  '<button class="primary" data-act="sadd2"'+(full?' disabled':'')+'>In meinen Sport-Videos speichern</button></div>'+YT_NOTE+'</div>';
+}
 
 /* ---------- Ernährung ---------- */
 R.food=function(){
@@ -576,7 +598,7 @@ function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]
 var A={
  nav:function(e){go(e.dataset.v)},
  appupd:function(){appUpdate()},
- vpaste:function(){var f=$("vtu");if(!navigator.clipboard||!navigator.clipboard.readText){if(f)f.focus();return toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")}navigator.clipboard.readText().then(function(t){if(f){f.value=String(t||"").trim();if(!val("vtt")&&ytId(f.value))$("vtt").value="YouTube-Video";f.focus()}}).catch(function(){if(f)f.focus();toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")})},
+ vpaste:function(e){var fi=(e&&e.dataset.in)||"vtu",ti=(e&&e.dataset.ti)||"vtt";var f=$(fi);if(!navigator.clipboard||!navigator.clipboard.readText){if(f)f.focus();return toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")}navigator.clipboard.readText().then(function(t){if(f){f.value=String(t||"").trim();if(!val(ti)&&ytId(f.value))$(ti).value="YouTube-Video";f.focus()}}).catch(function(){if(f)f.focus();toast("Bitte lange in das Feld tippen und „Einsetzen“ wählen.")})},
  vplay:function(e){
   var box=$("vf-"+e.dataset.slot);if(!box)return;
   if(!navigator.onLine)return toast("Keine Internetverbindung. Das Video braucht Internet.");
@@ -584,6 +606,9 @@ var A={
   box.innerHTML='<div class="vframe"><iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(e.dataset.id)+'?autoplay=1&rel=0&playsinline=1" title="YouTube-Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
   var c=box.closest(".card");if(c)c.classList.add("novib");
  },
+ ssave:function(e){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var v=VLIB.sport["Ganzkörper"].concat(VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]).filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.sportVids.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
+ sadd2:function(){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var u=val("stu"),id=ytId(u);if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(S.sportVids.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");S.sportVids.push({id:uid(),t:val("stt")||"Sport-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
+ sdel2:function(e){S.sportVids=(S.sportVids||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
  vsave:function(e){var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.videos.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id),d:false});save();render();toast("In Ihre Videoliste übernommen.")},
  vday:function(e){S.vseen=S.vseen||{};if(e.checked)S.vseen[today()]=true;else delete S.vseen[today()];save()},
  calm:function(){S.calm=!S.calm;save();render()},
@@ -631,7 +656,7 @@ document.addEventListener("click",function(ev){
 });
 document.addEventListener("submit",function(ev){
   var f=ev.target;if(!f.dataset||!f.dataset.yt)return;ev.preventDefault();
-  var q=val("yq");if(!q)return toast("Bitte einen Suchbegriff eingeben.");
+  var inp=f.querySelector("input"),q=inp?inp.value.trim():"";if(!q)return toast("Bitte einen Suchbegriff eingeben.");
   if(!navigator.onLine)return toast("Keine Internetverbindung. Die YouTube-Suche braucht Internet.");
   var a=document.createElement("a");a.href=ytSearchUrl(q);a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
 });
@@ -645,7 +670,7 @@ document.addEventListener("change",function(ev){
   if(el.type==="checkbox"&&a&&A[a])A[a](el);
 });
 document.addEventListener("input",function(ev){var el=ev.target;if(el.dataset&&el.dataset.act==="wk"){S.week[el.dataset.d]=el.value;save()}});
-document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.tagName==="INPUT"&&!ev.target.form&&ev.target.type!=="checkbox"&&ev.target.type!=="file"){var btn=ev.target.closest(".card");if(btn){var p=btn.querySelector("button.primary,button[data-act='madd']");if(p)p.click()}}});
+document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.tagName==="INPUT"&&!ev.target.form&&ev.target.type!=="checkbox"&&ev.target.type!=="file"){var st=ev.target.closest(".stack"),btn=ev.target.closest(".card");var p=(st&&st.querySelector("button.primary"))||(btn&&btn.querySelector("button.primary,button[data-act='madd']"));if(p&&!p.disabled)p.click()}});
 
 var h=location.hash.replace("#","");if(VIEWS.some(function(v){return v[0]===h}))cur=h;
 buildNav();render();drawBanner();
