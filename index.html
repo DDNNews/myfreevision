@@ -184,7 +184,7 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.4";
+var APP_VERSION="5.5";
 var APP_URL="https://ddnnews.github.io/myfreevision/";
 function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
 function chromeUrl(){return isIOS()?"googlechromes://"+APP_URL.replace(/^https:\/\//,""):APP_URL}
@@ -209,6 +209,7 @@ var DEFAULT={
   habits:[{id:"h1",t:"Morgenmotivation lesen",log:{}},{id:"h2",t:"15 Minuten Bewegung",log:{}},{id:"h3",t:"Wasserziel erreichen",log:{}}]
 };
 var S=load();
+if(!Array.isArray(S.motVids)){S.motVids=(S.videos||[]).filter(function(v){return v&&v.url}).map(function(v){return {id:v.id,t:v.t,url:v.url}});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);for(var k in DEFAULT)if(!(k in o))o[k]=JSON.parse(JSON.stringify(DEFAULT[k]));return o}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT))}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Speichern nicht möglich (Browser blockiert Speicher).")}}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -360,11 +361,28 @@ var VLIB={
  }
 };
 function ytWatch(id){return "https://www.youtube.com/watch?v="+id}
-function vItem(v,slot,target){
-  if(target==="sport"){var inS=(S.sportVids||[]).some(function(x){return ytId(x.url)===v.id});
-    return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inS?'<span>In meinen Sport-Videos</span>':'<button data-act="ssave" data-id="'+v.id+'">Speichern</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';}
-  var inList=S.videos.some(function(x){return x.url===ytWatch(v.id)});
-  return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inList?'<span>In meiner Liste</span>':'<button data-act="vsave" data-id="'+v.id+'">In meine Liste</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';
+function vItem(v,slot,key){
+  key=key||"motVids";var L=S[key]||[],has=L.some(function(x){return ytId(x.url)===v.id});
+  return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(has?'<span>In meiner Liste</span>':'<button data-act="lsave" data-list="'+key+'" data-id="'+v.id+'">Speichern</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';
+}
+var LIST_MAX=5;
+var YT_ACCOUNT=[["Mein Konto","https://www.youtube.com/feed/you"],["Später ansehen","https://www.youtube.com/playlist?list=WL"],["Playlists","https://www.youtube.com/feed/playlists"],["Abos","https://www.youtube.com/feed/subscriptions"],["Verlauf","https://www.youtube.com/feed/history"]];
+function ytCard(c){
+  var L=S[c.key]||[],full=L.length>=LIST_MAX;
+  var items=L.map(function(v){var id=ytId(v.url),u=safeUrl(v.url);return '<div class="vitem">'+(id?'<button class="vplay" data-act="vplay" data-id="'+id+'" data-slot="'+c.key+v.id+'" aria-label="'+esc(v.t)+' abspielen">▶</button>':'')+'<div class="vmeta"><b>'+esc(v.t)+'</b><div class="vlinks">'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>':'')+'<button data-act="ldel" data-list="'+c.key+'" data-id="'+v.id+'" aria-label="'+esc(v.t)+' löschen">Löschen</button></div></div></div><div id="vf-'+c.key+v.id+'"></div>'}).join("");
+  return '<div class="card novib"><div class="row between"><h2 style="margin:0">Mein YouTube · '+c.name+'</h2><span class="tag">'+L.length+' / '+LIST_MAX+'</span></div>'+
+  '<p class="eyebrow" style="margin-top:1rem">Mein Konto</p><div class="chips" style="margin-top:0">'+YT_ACCOUNT.map(function(a){return '<a class="chip" href="'+a[1]+'" target="_blank" rel="noopener noreferrer">'+a[0]+'</a>'}).join("")+'</div>'+
+  '<p class="muted">Öffnet Ihr YouTube-Konto in der YouTube-App oder im Browser. Melden Sie sich dort einmal an. MyFreeVision selbst liest keine Kontodaten.</p>'+
+  '<p class="eyebrow" style="margin-top:1rem">Meine Videos</p>'+
+  (items?'<div class="vlist">'+items+'</div>':'<p class="muted">Noch keine Videos gespeichert. Bis zu 5 Videos pro Thema, aus der Auswahl, der Suche oder per Link.</p>')+
+  '<div class="stack" style="margin-top:.6rem"><div><label for="'+c.ti+'">Titel</label><input id="'+c.ti+'" maxlength="90" placeholder="'+c.tph+'"></div><div><label for="'+c.ui+'">YouTube-Link</label><div class="ytbar"><input id="'+c.ui+'" type="url" inputmode="url" placeholder="https://"><button type="button" data-act="vpaste" data-in="'+c.ui+'" data-ti="'+c.ti+'">Link einfügen</button></div></div>'+
+  (full?'<p class="muted">Alle 5 Plätze sind belegt. Löschen Sie ein Video, um ein neues zu speichern.</p>':'')+
+  '<button class="primary" data-act="ladd" data-list="'+c.key+'" data-ti="'+c.ti+'" data-ui="'+c.ui+'"'+(full?' disabled':'')+'>Video speichern</button></div>'+
+  '<p class="eyebrow" style="margin-top:1.2rem">Auf YouTube suchen</p>'+
+  '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="'+c.q+'">Suchbegriff für YouTube</label><input id="'+c.q+'" type="search" maxlength="100" placeholder="'+c.ph+'" enterkeyhint="search"><button type="submit">Suchen</button></form>'+
+  '<div class="chips">'+c.chips.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
+  '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann oben bei „YouTube-Link“ einfügen und speichern.</p>'+
+  '<p class="muted"><span class="tag ext">Extern: YouTube</span> Konto, Suche und Videos laufen bei YouTube (Google) und brauchen Internet.</p></div>';
 }
 var YT_NOTE='<p class="muted"><span class="tag ext">Extern: YouTube</span> Das Video lädt erst, wenn Sie auf ▶ tippen. Dann überträgt YouTube (Google) Daten wie Ihre IP-Adresse. Dafür ist Internet nötig.</p>';
 function ytId(u){u=String(u||"");var m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:""}
@@ -475,15 +493,8 @@ R.video=function(){
   var vd=vOfDay(),seen=!!(S.vseen&&S.vseen[today()]);
   return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Jeden Tag ein Impuls-Video. Wechsel täglich um 12:00 Uhr.</p><hr class="hr">'+
   '<div class="card novib vhero"><p class="eyebrow">Video des Tages</p><h2>'+esc(vd.t)+'</h2><p class="muted" style="margin:0">'+esc(vd.ch)+' · '+esc(vd.d)+' Min.</p><button class="vplay" data-act="vplay" data-id="'+vd.id+'" data-slot="day">▶ Abspielen</button><div id="vf-day"></div><label class="check" style="font-size:.95rem;color:var(--text);margin:0"><input type="checkbox" data-act="vday" '+(seen?'checked':'')+'><span class="t">Heute gesehen</span></label>'+YT_NOTE+'</div>'+
-  '<div class="card novib"><h2>Motivation</h2><div class="vlist">'+VLIB.mot.map(function(v,i){return vItem(v,"m"+i)}).join("")+'</div></div>'+
-  '<div class="card novib"><h2>YouTube durchsuchen</h2><p class="muted">Ergänzend zur Auswahl: Suchen Sie selbst nach weiteren Videos. Die Suche öffnet YouTube in der YouTube-App oder im Browser.</p>'+
-  '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="yq">Suchbegriff für YouTube</label><input id="yq" type="search" maxlength="100" placeholder="z. B. Motivation am Morgen" enterkeyhint="search"><button class="primary" type="submit">Auf YouTube suchen</button></form>'+
-  '<div class="chips">'+YT_CHIPS.map(function(q){return '<a class="chip" href="'+ytSearchUrl(q)+'" target="_blank" rel="noopener noreferrer">'+esc(q)+'</a>'}).join("")+'</div>'+
-  '<p style="margin:.2rem 0 .6rem"><a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube öffnen</a></p>'+
-  '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann unten bei „Video hinzufügen“ einfügen. YouTube-Videos aus Ihrer Liste spielen Sie mit ▶ direkt hier in der App ab.</p>'+
-  '<p class="muted"><span class="tag ext">Extern: YouTube</span> Die Suche läuft bei YouTube (Google) und braucht Internet.</p></div>'+
-  '<div class="card"><h2>Meine Videoliste</h2>'+(list||'<p class="muted">Noch keine Videos. Füge unten einen Link hinzu.</p>')+'</div>'+
-  '<div class="card"><h2>Video hinzufügen</h2><div class="stack"><div><label for="vtt">Titel</label><input id="vtt" maxlength="90"></div><div><label for="vtu">Link (z. B. YouTube)</label><div class="ytbar"><input id="vtu" type="url" inputmode="url" placeholder="https://"><button type="button" data-act="vpaste">Link einfügen</button></div></div><button class="primary" data-act="vidadd">Speichern</button><p class="muted">Videos öffnen sich im neuen Tab bei einem externen Anbieter. Dafür ist eine Internetverbindung nötig.</p></div></div>'+
+  ytCard({key:"motVids",name:"Motivation",ti:"mtt",ui:"mtu",q:"yq",chips:YT_CHIPS,ph:"z. B. Motivation am Morgen",tph:"z. B. Morgenimpuls"})+
+  '<div class="card novib"><h2>Empfohlene Motivation</h2><div class="vlist">'+VLIB.mot.map(function(v,i){return vItem(v,"m"+i,"motVids")}).join("")+'</div></div>'+
   '';
 };
 
@@ -495,7 +506,7 @@ R.sport=function(){
   '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
   '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
   '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
-  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sport")}).join("")+'</div>'+YT_NOTE+'</div>'+sportMine()+
+  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+ytCard({key:"sportVids",name:"Sport",ti:"stt",ui:"stu",q:"yqs",chips:YT_CHIPS_SPORT,ph:"z. B. 15 Min Ganzkörper",tph:"z. B. Rücken am Morgen"})+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
@@ -507,18 +518,6 @@ function drawTimer(){
   var b=document.getElementById("wbtn");if(b)b.textContent=sp.run?"Pause":"Start";
 }
 function wtick(){sp.sec--;if(sp.sec<=0){sp.sec=0;sp.run=false;clearInterval(tmr);tmr=null;S.sport[today()]=true;save();toast("15 Minuten geschafft.")}drawTimer()}
-
-function sportMine(){
-  var L=S.sportVids||[],full=L.length>=SPORT_MAX;
-  var items=L.map(function(v){var id=ytId(v.url),u=safeUrl(v.url);return '<div class="vitem">'+(id?'<button class="vplay" data-act="vplay" data-id="'+id+'" data-slot="p'+v.id+'" aria-label="'+esc(v.t)+' abspielen">▶</button>':'')+'<div class="vmeta"><b>'+esc(v.t)+'</b><div class="vlinks">'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>':'')+'<button data-act="sdel2" data-id="'+v.id+'" aria-label="'+esc(v.t)+' löschen">Löschen</button></div></div></div><div id="vf-p'+v.id+'"></div>'}).join("");
-  return '<div class="card novib"><div class="row between"><h2 style="margin:0">Meine Sport-Videos</h2><span class="tag">'+L.length+' / '+SPORT_MAX+'</span></div>'+
-  (items?'<div class="vlist">'+items+'</div>':'<p class="muted" style="margin-top:.5rem">Noch keine eigenen Sport-Videos. Speichern Sie bis zu 5 Videos aus der Auswahl oben oder aus der YouTube-Suche.</p>')+'</div>'+
-  ytSearchCard("yqs","YouTube durchsuchen","Weitere Workouts finden. Die Suche öffnet YouTube in der App oder im Browser.",YT_CHIPS_SPORT,"z. B. 15 Min Ganzkörper")+
-  '<p class="muted"><b>Video gefunden?</b> In YouTube auf „Teilen“ und „Link kopieren“ tippen, dann hier einfügen und speichern.</p>'+
-  '<div class="stack"><div><label for="stt">Titel</label><input id="stt" maxlength="90" placeholder="z. B. Rücken am Morgen"></div><div><label for="stu">YouTube-Link</label><div class="ytbar"><input id="stu" type="url" inputmode="url" placeholder="https://"><button type="button" data-act="vpaste" data-in="stu" data-ti="stt">Link einfügen</button></div></div>'+
-  (full?'<p class="muted">Alle 5 Plätze sind belegt. Löschen Sie oben ein Video, um ein neues zu speichern.</p>':'')+
-  '<button class="primary" data-act="sadd2"'+(full?' disabled':'')+'>In meinen Sport-Videos speichern</button></div>'+YT_NOTE+'</div>';
-}
 
 /* ---------- Ernährung ---------- */
 R.food=function(){
@@ -619,6 +618,9 @@ var A={
  ssave:function(e){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var v=VLIB.sport["Ganzkörper"].concat(VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]).filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.sportVids.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sadd2:function(){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var u=val("stu"),id=ytId(u);if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(S.sportVids.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");S.sportVids.push({id:uid(),t:val("stt")||"Sport-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sdel2:function(e){S.sportVids=(S.sportVids||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
+ lsave:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;L.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
+ ladd:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var id=ytId(val(e.dataset.ui));if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(L.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");L.push({id:uid(),t:val(e.dataset.ti)||"YouTube-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
+ ldel:function(e){var k=e.dataset.list;S[k]=(S[k]||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
  vsave:function(e){var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.videos.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id),d:false});save();render();toast("In Ihre Videoliste übernommen.")},
  vday:function(e){S.vseen=S.vseen||{};if(e.checked)S.vseen[today()]=true;else delete S.vseen[today()];save()},
  calm:function(){S.calm=!S.calm;save();render()},
