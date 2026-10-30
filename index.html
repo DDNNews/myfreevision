@@ -179,6 +179,9 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
+var APP_VERSION="5.1";
+var APP_FILES=["index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","version.json"];
+var updAvail=null;
 var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
 var DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
 
@@ -397,7 +400,7 @@ R.dash=function(){
   var hp=hTot?Math.round(hDone/hTot*100):0;
   var bars=last7().map(function(d){var c=S.water[dkey(d)]||0,p=Math.min(100,Math.round(c/S.waterGoal*100));return '<div><b style="height:'+p+'%" title="'+c+' Gläser"></b>'+["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()]+'</div>'}).join("");
   var open=0;S.goals.forEach(function(g){g.ms.forEach(function(m){if(!m.d)open++})});
-  return '<p class="eyebrow">'+new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+'</p><h1>Dein Fortschritt</h1><p class="muted">Ein Blick auf alles, was dich Schritt für Schritt zu deiner Vision bringt.</p><hr class="hr">'+dashNotes()+
+  return (updAvail?'<div class="card novib"><div class="row between"><div><p class="eyebrow">Update</p><p style="margin:0">Version '+esc(updAvail)+' ist verfügbar.</p></div><button class="primary" data-act="appupd">Jetzt aktualisieren</button></div></div>':'')+'<p class="eyebrow">'+new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+'</p><h1>Dein Fortschritt</h1><p class="muted">Ein Blick auf alles, was dich Schritt für Schritt zu deiner Vision bringt.</p><hr class="hr">'+dashNotes()+
   '<div class="grid two">'+
   '<div class="card"><p class="eyebrow">Wasser heute</p><p class="big">'+w+' / '+S.waterGoal+'</p><div class="bar" aria-hidden="true"><i style="width:'+wp+'%"></i></div></div>'+
   '<div class="card"><p class="eyebrow">Gewohnheiten heute</p><p class="big">'+hDone+' / '+hTot+'</p><div class="bar" aria-hidden="true"><i style="width:'+hp+'%"></i></div></div>'+
@@ -518,11 +521,39 @@ R.habits=function(){
 /* ---------- Daten / Sicherung ---------- */
 R.data=function(){
   return '<p class="eyebrow">Einstellungen</p><h1>Daten und Sicherung</h1><p class="muted">Alle Daten liegen nur in diesem Browser auf diesem Gerät. Sie werden nicht übertragen.</p><hr class="hr">'+
+  '<div class="card"><h2>App-Version</h2><p>Version <b>'+APP_VERSION+'</b>. Die App läuft ohne Internet mit der gespeicherten Version. Neue Versionen holen Sie hier, sobald Sie online sind.</p>'+(updAvail?'<p><span class="tag">Neu</span> Version '+esc(updAvail)+' ist verfügbar.</p>':'')+'<button class="primary" data-act="appupd">Nach Update suchen</button></div>'+
   '<div class="card"><h2>Sicherungskopie</h2><p>Speichere regelmäßig eine Sicherung, besonders vor dem Löschen von Browserdaten. Mac und iPhone synchronisieren nicht automatisch; über die Sicherungsdatei kannst du Daten übertragen.</p><div class="row"><button class="primary" data-act="export">Sicherung herunterladen</button><button data-act="import">Sicherung einspielen</button></div><input type="file" id="imp" accept="application/json,.json" hidden></div>'+
   '<div class="card"><h2>Bewegung</h2><p>Post-its, Karten und Laufband bewegen sich leicht. Bei Bedarf lässt sich das abschalten. Die Einstellung "Bewegung reduzieren" Ihres Geräts wird ebenfalls beachtet.</p><button data-act="calm" aria-pressed="'+!!S.calm+'">'+(S.calm?'Bewegung einschalten':'Bewegung ausschalten')+'</button></div>'+
   '<div class="card"><h2>Externe Dienste</h2><p><span class="tag ext">Extern</span> Video-Links öffnen Seiten externer Anbieter.</p><p><span class="tag ext">KI-API nötig</span> Personalisierte KI-Texte sind nicht aktiv.</p></div>'+
   '<div class="card"><h2>Zurücksetzen</h2><p class="muted">Löscht alle Daten dieser App in diesem Browser. Lade vorher eine Sicherung herunter.</p><button class="ghost" data-act="reset">Alles zurücksetzen</button></div>';
 };
+
+/* ---------- App-Update (offline zuerst) ---------- */
+function canUpdate(){return "serviceWorker" in navigator&&"caches" in window&&/^https?:$/.test(location.protocol)}
+function fetchVersion(){return fetch("version.json?u="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){return String(j.v||"")})}
+function checkUpdateQuiet(){
+  if(!canUpdate()||!navigator.onLine)return;
+  fetchVersion().then(function(v){if(v&&v!==APP_VERSION){updAvail=v;if(cur==="dash"||cur==="data")render()}}).catch(function(){});
+}
+function appUpdate(){
+  if(!canUpdate())return toast("Updates gibt es nur in der installierten App.");
+  if(!navigator.onLine)return toast("Keine Internetverbindung. Die App läuft weiter mit Version "+APP_VERSION+".");
+  toast("Suche nach Update …");
+  fetchVersion().then(function(v){
+    if(v===APP_VERSION&&!updAvail){toast("Sie haben die neueste Version ("+APP_VERSION+").");return}
+    var t=Date.now();
+    return caches.open("myfreevision").then(function(c){
+      return Promise.all(APP_FILES.map(function(f){
+        return fetch(f+"?u="+t,{cache:"no-store"}).then(function(r){
+          if(!r.ok)throw new Error(f);
+          var puts=[c.put(f,r.clone())];if(f==="index.html")puts.push(c.put("./",r.clone()));return Promise.all(puts);
+        });
+      }));
+    }).then(function(){
+      return navigator.serviceWorker.getRegistration().then(function(r){if(r)return r.update().catch(function(){})});
+    }).then(function(){toast("Update auf Version "+v+" installiert. App startet neu.");setTimeout(function(){location.reload()},1200)});
+  }).catch(function(){toast("Update fehlgeschlagen. Bitte später erneut versuchen.")});
+}
 
 /* ---------- Aktionen ---------- */
 function $(id){return document.getElementById(id)}
@@ -530,6 +561,7 @@ function val(id){var e=$(id);return e?e.value.trim():""}
 function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]}
 var A={
  nav:function(e){go(e.dataset.v)},
+ appupd:function(){appUpdate()},
  vplay:function(e){
   var box=$("vf-"+e.dataset.slot);if(!box)return;
   if(!navigator.onLine)return toast("Keine Internetverbindung. Das Video braucht Internet.");
@@ -596,7 +628,7 @@ document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.
 
 var h=location.hash.replace("#","");if(VIEWS.some(function(v){return v[0]===h}))cur=h;
 buildNav();render();drawBanner();
-if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){var hadCtrl=!!navigator.serviceWorker.controller,swReloaded=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(hadCtrl&&!swReloaded){swReloaded=true;location.reload()}});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").then(function(r){r.update()}).catch(function(){})})}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){var hadCtrl=!!navigator.serviceWorker.controller,swReloaded=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(hadCtrl&&!swReloaded){swReloaded=true;location.reload()}});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});setTimeout(checkUpdateQuiet,3000)})}
 $("bpause").addEventListener("click",function(){bPaused=!bPaused;$("banner").classList.toggle("paused",bPaused);this.setAttribute("aria-pressed",bPaused);this.textContent=bPaused?"Weiter":"Pause";this.setAttribute("aria-label",bPaused?"Laufband fortsetzen":"Laufband anhalten")});
 setInterval(checkBanner,30000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden)checkBanner()});
