@@ -184,7 +184,7 @@ html.calm .bpause{display:none}
 <script>
 "use strict";
 var KEY="myfreevision.v1";
-var APP_VERSION="5.5";
+var APP_VERSION="5.6";
 var APP_URL="https://ddnnews.github.io/myfreevision/";
 function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
 function chromeUrl(){return isIOS()?"googlechromes://"+APP_URL.replace(/^https:\/\//,""):APP_URL}
@@ -339,6 +339,15 @@ var VLIB={
   {id:"wcG-duYAdYM",t:"Disziplin entwickeln in 7 Schritten",ch:"Henry Hildebrandt",d:"13:44"},
   {id:"Mix5JOgYTuQ",t:"Eine der besten Motivationsreden",ch:"Oscar Karem",d:"13:25"}
  ],
+ sport30:[
+  {id:"T2lyoAhcnXI",t:"30 Min Ganzkörper ohne Geräte",ch:"Sascha Huber",d:"33:42"},
+  {id:"C19KinNxrBs",t:"30 Min Ganzkörper, ohne Springen",ch:"Paulina Wallner",d:"31:08"},
+  {id:"9PvUWUCMsFI",t:"30 Min HIIT Ganzkörper",ch:"Sascha Huber",d:"34:11"},
+  {id:"UIPvIYsjfpo",t:"30 Min Ganzkörper mit Aufwärmen",ch:"Rowan Row",d:"32:53"},
+  {id:"IMctZ4i2FRw",t:"Ganzkörper für Einsteiger mit Warm-up",ch:"Mady Morrison",d:"30:10"},
+  {id:"JCsJgYI2vys",t:"Yoga für Rücken und Wirbelsäule",ch:"Mady Morrison",d:"28:44"},
+  {id:"MzGeueRmVuA",t:"Yin Yoga für Rücken und Hüften",ch:"Mady Morrison",d:"31:38"}
+ ],
  sport:{
   "Ganzkörper":[
    {id:"JSn5DY10dbA",t:"15 Min Ganzkörper für Anfänger",ch:"Sophia Thiel",d:"15:49"},
@@ -389,6 +398,7 @@ function ytId(u){u=String(u||"");var m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/
 var YT_CHIPS=["Motivation deutsch","Morgenroutine","15 Min Workout ohne Geräte","Rücken Übungen","Meditation Morgen","Finanzielle Freiheit","Produktivität","Remote arbeiten und reisen"];
 var YT_CHIPS_SPORT=["15 Min Workout ohne Geräte","HIIT 15 Minuten","Workout ohne Springen","Bauch Workout 10 Minuten","Rücken Übungen","Mobility Routine","Yoga für Anfänger","Dehnen nach dem Sport"];
 var SPORT_MAX=5;
+var YT_CHIPS_SPORT30=["30 Min Ganzkörper Workout","30 Min HIIT ohne Geräte","30 Min Workout ohne Springen","30 Min Muskelaufbau zuhause","30 Min Yoga Flow","30 Min Rücken Yoga","30 Min Mobility","30 Min Dehnen"];
 function ytSearchCard(id,title,intro,chips,ph){
   return '<div class="card novib"><h2>'+title+'</h2><p class="muted">'+intro+'</p>'+
   '<form class="ytbar" data-yt="1" role="search"><label class="sr-only" for="'+id+'">Suchbegriff für YouTube</label><input id="'+id+'" type="search" maxlength="100" placeholder="'+ph+'" enterkeyhint="search"><button class="primary" type="submit">Auf YouTube suchen</button></form>'+
@@ -506,7 +516,10 @@ R.sport=function(){
   '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
   '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
   '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
-  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+ytCard({key:"sportVids",name:"Sport",ti:"stt",ui:"stu",q:"yqs",chips:YT_CHIPS_SPORT,ph:"z. B. 15 Min Ganzkörper",tph:"z. B. Rücken am Morgen"})+
+  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i,"sportVids")}).join("")+'</div>'+YT_NOTE+'</div>'+ytCard({key:"sportVids",name:"Sport 15 Min",ti:"stt",ui:"stu",q:"yqs",chips:YT_CHIPS_SPORT,ph:"z. B. 15 Min Ganzkörper",tph:"z. B. Rücken am Morgen"})+
+  '<h2 style="margin:1.6rem 0 .3rem">Sport 30 Minuten</h2><p class="muted">Für Tage mit mehr Zeit: längere Workouts mit Aufwärmen, Kraft, HIIT oder Yoga.</p>'+
+  '<div class="card novib"><h2>Empfohlen: 30 Minuten</h2><div class="vlist">'+VLIB.sport30.map(function(v,i){return vItem(v,"t"+i,"sport30Vids")}).join("")+'</div>'+YT_NOTE+'</div>'+
+  ytCard({key:"sport30Vids",name:"Sport 30 Min",ti:"s3t",ui:"s3u",q:"yqs3",chips:YT_CHIPS_SPORT30,ph:"z. B. 30 Min Ganzkörper",tph:"z. B. Kraft am Wochenende"})+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
@@ -618,7 +631,7 @@ var A={
  ssave:function(e){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var v=VLIB.sport["Ganzkörper"].concat(VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]).filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.sportVids.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sadd2:function(){S.sportVids=S.sportVids||[];if(S.sportVids.length>=SPORT_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var u=val("stu"),id=ytId(u);if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(S.sportVids.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");S.sportVids.push({id:uid(),t:val("stt")||"Sport-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+S.sportVids.length+" / 5).")},
  sdel2:function(e){S.sportVids=(S.sportVids||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
- lsave:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;L.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
+ lsave:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"],VLIB.sport30);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;L.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
  ladd:function(e){var k=e.dataset.list,L=S[k]=S[k]||[];if(L.length>=LIST_MAX)return toast("Alle 5 Plätze sind belegt. Bitte erst ein Video löschen.");var id=ytId(val(e.dataset.ui));if(!id)return toast("Bitte einen gültigen YouTube-Link einfügen.");if(L.some(function(x){return ytId(x.url)===id}))return toast("Dieses Video ist schon gespeichert.");L.push({id:uid(),t:val(e.dataset.ti)||"YouTube-Video",url:ytWatch(id)});save();render();toast("Gespeichert ("+L.length+" / 5).")},
  ldel:function(e){var k=e.dataset.list;S[k]=(S[k]||[]).filter(function(x){return x.id!==e.dataset.id});save();render();toast("Video gelöscht.")},
  vsave:function(e){var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.videos.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id),d:false});save();render();toast("In Ihre Videoliste übernommen.")},
