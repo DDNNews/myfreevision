@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F0EDE5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MyFreeVision">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>MyFreeVision</title>
+<style>
+:root{
+  --bg:#F0EDE5; --card:#E8E3D8; --text:#35332E; --muted:#8D8980; --accent:#D97757; --line:#D8D2C6;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --bh:46px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:17px;line-height:1.55;min-height:100vh}
+h1,h2,h3{font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:2rem;margin-bottom:.25rem}
+h2{font-size:1.3rem;margin-bottom:.5rem}
+h3{font-size:1.05rem}
+p{margin-bottom:.6rem}
+.muted{color:var(--muted);font-size:.9rem}
+.eyebrow{font-family:var(--sans);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.skip{position:absolute;left:-999px;top:0;background:var(--accent);color:var(--text);padding:.6rem 1rem;z-index:99}
+.skip:focus{left:8px;top:8px}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+nav.side{display:none}
+main{flex:1;width:100%;max-width:880px;margin:0 auto;padding:1.4rem 1.1rem calc(6.5rem + env(safe-area-inset-bottom))}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding:.35rem .4rem calc(.35rem + env(safe-area-inset-bottom));gap:.2rem;z-index:10;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.navbtn{font-family:var(--sans);font-size:.78rem;background:none;border:0;color:var(--muted);padding:.65rem .8rem;min-height:44px;border-radius:10px;white-space:nowrap;cursor:pointer}
+.navbtn[aria-current="page"]{background:var(--card);color:var(--text);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
+@media(min-width:900px){
+  nav.tabs{display:none}
+  nav.side{display:flex;flex-direction:column;gap:.15rem;width:230px;padding:1.6rem 1rem;border-right:1px solid var(--line);position:sticky;top:var(--bh);height:calc(100vh - var(--bh));overflow-y:auto}
+  nav.side .brand{font-size:1.3rem;font-weight:600;margin-bottom:1.2rem;padding-left:.6rem}
+  nav.side .brand span{color:var(--accent)}
+  nav.side .navbtn{text-align:left;font-size:.9rem}
+  main{padding:2.4rem 2.4rem 3rem}
+}
+
+/* Bausteine */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.15rem;margin-bottom:.9rem}
+.grid{display:grid;gap:.9rem;grid-template-columns:1fr}
+@media(min-width:640px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}}
+.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.stack>*+*{margin-top:.5rem}
+button,.btn{font-family:var(--sans);font-size:.9rem;min-height:44px;padding:.55rem 1rem;border-radius:10px;border:1px solid var(--text);background:transparent;color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--text);font-weight:600}
+button.small{min-height:36px;padding:.3rem .7rem;font-size:.8rem}
+button.ghost{border-color:var(--line);color:var(--muted)}
+button:hover{border-color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input,textarea,select{font-family:var(--serif);font-size:1rem;width:100%;min-height:44px;padding:.55rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+textarea{min-height:84px;resize:vertical}
+label{font-family:var(--sans);font-size:.78rem;color:var(--muted);display:block;margin-bottom:.2rem}
+.tag{font-family:var(--sans);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--accent);color:var(--text);border-radius:99px;padding:.1rem .55rem;display:inline-block}
+.tag.ext{background:var(--bg)}
+.bar{height:10px;border-radius:99px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.big{font-size:2.2rem;font-weight:600;line-height:1}
+.check{display:flex;gap:.7rem;align-items:center;min-height:44px;padding:.2rem 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:24px;min-height:24px;height:24px;accent-color:#D97757;flex:none}
+.check .t{flex:1}
+.check.done .t{color:var(--muted);text-decoration:line-through}
+.x{background:none;border:0;color:var(--muted);min-height:36px;padding:0 .5rem}
+.quote{font-size:1.45rem;line-height:1.35;font-style:italic}
+.drops{display:flex;gap:.45rem;flex-wrap:wrap}
+.drop{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--accent);background:var(--bg);padding:0;font-size:.75rem;color:var(--muted)}
+.drop.on{background:var(--accent);color:var(--text)}
+.timer{font-size:3.4rem;font-weight:600;text-align:center;font-variant-numeric:tabular-nums}
+.bars{display:flex;align-items:flex-end;gap:.5rem;height:110px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-family:var(--sans);font-size:.7rem;color:var(--muted)}
+.bars b{display:block;width:100%;background:var(--accent);border-radius:6px 6px 0 0;min-height:3px}
+.vcard{min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
+.vcard h3{font-size:1.2rem}
+.hr{border:0;border-top:1px solid var(--line);margin:1rem 0}
+details{border-top:1px solid var(--line);padding:.6rem 0}
+summary{cursor:pointer;font-weight:600;min-height:36px;display:flex;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(5.5rem + env(safe-area-inset-bottom));background:var(--text);color:var(--bg);padding:.6rem 1rem;border-radius:10px;font-family:var(--sans);font-size:.85rem;z-index:30}
+@media(min-width:900px){.toast{bottom:1.5rem}}
+
+/* Banner (Laufband) */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.banner{position:sticky;top:0;z-index:12;min-height:calc(var(--bh) + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);background:var(--accent);color:var(--text);border-bottom:1px solid var(--text);display:flex;align-items:center}
+.ticker{flex:1;overflow:hidden;white-space:nowrap}
+.ticker-track{display:inline-flex;width:max-content;animation:tick linear infinite}
+.ticker-track span{padding-right:3.5rem;font-size:1.05rem;font-style:italic;font-weight:600}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker:hover .ticker-track,.banner.paused .ticker-track{animation-play-state:paused}
+.bpause{min-height:36px;margin:0 .5rem;padding:.2rem .7rem;font-size:.75rem;border-color:var(--text);flex:none}
+@media(prefers-reduced-motion:reduce){
+  .ticker{white-space:normal;overflow:visible;text-align:center;padding:.5rem .8rem}
+  .ticker-track{display:block;width:auto}
+  .ticker-track span:not(:first-child){display:none}
+  .ticker-track span{padding:0}
+  .bpause{display:none}
+}
+/* Post-its */
+.postits{display:grid;gap:.8rem;grid-template-columns:repeat(2,1fr);padding:.4rem .3rem 1rem}
+@media(min-width:640px){.postits{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.postits{grid-template-columns:repeat(4,1fr)}}
+.postit{min-height:78px;padding:.55rem .65rem .4rem;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line);border-radius:4px;box-shadow:2px 3px 0 var(--line);transform:rotate(var(--r,0deg));transition:transform .15s;animation:bob 4.8s ease-in-out infinite alternate}
+.postit:hover,.postit:focus-within{animation:none;transform:rotate(0deg) scale(1.06)}
+.postit:nth-child(2n){animation-duration:4.1s;animation-delay:-1s}
+.postit:nth-child(3n){animation-duration:5.7s;animation-delay:-2.4s}
+.postit:nth-child(5n){animation-delay:-3.3s}
+@keyframes bob{from{transform:rotate(var(--r,0deg)) translateY(0)}to{transform:rotate(calc(var(--r,0deg) + 1.4deg)) translateY(-4px)}}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+.card{animation:drift 7s ease-in-out infinite alternate}
+.card:nth-child(2n){animation-duration:8.5s;animation-delay:-2s}
+.card:nth-child(3n){animation-duration:6.2s;animation-delay:-4s}
+.card:hover,.card:focus-within{animation-play-state:paused}
+.postit.c0{background:var(--card)}
+.postit.c1{background:var(--accent);border-color:var(--accent);color:var(--text)}
+.postit.c2{background:var(--bg);border-color:var(--muted)}
+.postit .pw{font-size:1.02rem;font-style:italic;line-height:1.25;font-weight:600;overflow-wrap:anywhere}
+.postit .pa{display:flex;justify-content:space-between;align-items:center;gap:.3rem;margin-top:.5rem}
+.postit .pa button{min-height:36px;padding:0 .3rem;border:0;background:none;font-family:var(--sans);font-size:.72rem;color:var(--text);text-decoration:underline}
+.postit.pinned .pa button[data-act="npin"]{font-weight:700}
+.postit.big{min-height:96px}
+.postit .plabel{font-family:var(--sans);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.postits.six{grid-template-columns:repeat(3,1fr);padding:.3rem .2rem .6rem}
+@media(min-width:900px){.postits.six{grid-template-columns:repeat(6,1fr)}}
+.postits.six .postit{min-height:68px}
+.postits.six .pw{font-size:.95rem}
+.postit.l-de{background:var(--bg);border-color:var(--muted);color:var(--text)}
+.postit.l-en{background:var(--card);border-color:var(--line);color:var(--text)}
+.postit.l-pt{background:var(--accent);border-color:var(--accent);color:var(--text)}
+.postit.l-fr{background:var(--line);border-color:var(--muted);color:var(--text)}
+.postit.l-es{background:var(--muted);border-color:var(--text);color:var(--text)}
+.postit.l-uk{background:var(--text);border-color:var(--text);color:var(--bg)}
+html.calm .postit,html.calm .card{animation:none!important}
+html.calm .ticker{white-space:normal;overflow:visible;text-align:center;padding:.5rem .8rem}
+html.calm .ticker-track{display:block;width:auto;animation:none!important}
+html.calm .ticker-track span:not(:first-child){display:none}
+html.calm .ticker-track span{padding:0}
+html.calm .bpause{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="banner" id="banner" aria-label="Motivation des Tages"><div class="ticker" aria-hidden="true"><div class="ticker-track" id="track"></div></div><span class="sr-only" id="bsr"></span><button class="bpause" id="bpause" aria-pressed="false" aria-label="Laufband anhalten">Pause</button></header>
+<div class="app">
+  <nav class="side" id="side" aria-label="Hauptnavigation"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<nav class="tabs" id="tabs" aria-label="Hauptnavigation mobil"></nav>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+"use strict";
+var KEY="myfreevision.v1";
+var VIEWS=[["dash","Dashboard"],["vision","Vision Board"],["notes","Post-its"],["goals","Ziele"],["morning","Morgen"],["video","Video-Coach"],["sport","Sport 15 Min"],["food","Ernährung"],["week","Wochenplan"],["shop","Einkauf"],["water","Wasser"],["habits","Gewohnheiten"],["data","Daten"]];
+var DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+
+var DEFAULT={
+  vision:[
+    {id:"v1",title:"Finanzielle Freiheit",text:"Mein Einkommen deckt meine Lebenskosten, ohne dass ich Zeit gegen Geld tausche."},
+    {id:"v2",title:"Automatisiertes Unternehmen",text:"Mein Geschäft läuft durch klare Prozesse und Automatisierung zuverlässig."},
+    {id:"v3",title:"Zeitliche Unabhängigkeit",text:"Ich entscheide selbst, wann und wo ich arbeite."},
+    {id:"v4",title:"Reisen",text:"Ich reise regelmäßig und arbeite bewusst von schönen Orten aus."},
+    {id:"v5",title:"Gesundheit",text:"Ich bin fit, energiegeladen und schlafe gut."},
+    {id:"v6",title:"Lebensqualität",text:"Ich habe Zeit für Familie, Freunde und Dinge, die mir wichtig sind."}
+  ],
+  goals:[],quotes:[],videos:[],week:{},shop:[],
+  notes:["Mut","Fokus","Ruhe","Freiheit","Disziplin","Dankbarkeit","Klarheit","Energie","Geduld","Wachstum","Vertrauen","Leichtigkeit","Schritt für Schritt","Jetzt handeln"].map(function(t,i){return{id:"n"+(i+1),t:t,pin:false}}),
+  calm:false,
+  water:{},waterGoal:8,waterMl:250,focus:{},sport:{},
+  habits:[{id:"h1",t:"Morgenmotivation lesen",log:{}},{id:"h2",t:"15 Minuten Bewegung",log:{}},{id:"h3",t:"Wasserziel erreichen",log:{}}]
+};
+var S=load();
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);for(var k in DEFAULT)if(!(k in o))o[k]=JSON.parse(JSON.stringify(DEFAULT[k]));return o}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Speichern nicht möglich (Browser blockiert Speicher).")}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function dkey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){return dkey()}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},2600)}
+function safeUrl(u){u=String(u||"").trim();if(!u)return"";if(!/^https?:\/\//i.test(u))u="https://"+u;try{var x=new URL(u);return(x.protocol==="http:"||x.protocol==="https:")?x.href:""}catch(e){return""}}
+
+var MORNING=[
+ "Heute zählt nicht Perfektion, sondern der nächste klare Schritt.",
+ "Wer seine Zeit plant, gewinnt Freiheit zurück.",
+ "Kleine Handlungen, jeden Tag, bauen große Ergebnisse.",
+ "Mein Fokus gehört heute dem, was mich meiner Vision näherbringt.",
+ "Gesundheit ist die Grundlage jeder Freiheit. Ich beginne mit Bewegung.",
+ "Ich entscheide mich für Fortschritt statt für Ausreden.",
+ "Automatisieren, was sich wiederholt. Gestalten, was Wirkung hat.",
+ "Ruhe im Kopf schafft Klarheit im Handeln.",
+ "Ein einziger erledigter wichtiger Punkt macht den Tag zum Erfolg.",
+ "Ich bin dort, wo ich sein will, wenn ich heute konsequent bleibe.",
+ "Geduld und Beständigkeit schlagen Tempo ohne Richtung.",
+ "Mein Leben richtet sich nach meiner Vision, nicht nach dem Zufall."
+];
+var VIDEO_TOPICS=[
+ ["Finanzielle Grundlagen","Budget, Rücklagen, Investieren verstehen"],
+ ["Mindset & Fokus","Gewohnheiten, Prioritäten, Tagesstruktur"],
+ ["Automatisierung","Prozesse vereinfachen, Zeit zurückgewinnen"],
+ ["Unternehmertum","Angebot, Kunden, Skalierung"],
+ ["Gesundheit & Energie","Schlaf, Bewegung, Stressabbau"],
+ ["Reisen & Remote-Arbeit","Orte, Planung, Arbeitsroutine"]
+];
+var WORKOUTS={
+ "Ganzkörper":["Kniebeugen","Liegestütze (ggf. auf den Knien)","Ausfallschritte im Wechsel"],
+ "Core & Rücken":["Plank (Unterarmstütz)","Superman (Bauchlage)","Bergsteiger"],
+ "Beweglichkeit":["Hüftkreisen und Rumpfdrehung","Katze-Kuh-Übung","Tiefe Kniebeuge halten"]
+};
+var FOOD={
+ rules:["Eine Handvoll Protein pro Mahlzeit (Eier, Quark, Fisch, Hülsenfrüchte, Fleisch).","Den halben Teller mit Gemüse oder Salat füllen.","Vollkorn statt Weißmehl, Wasser statt gesüßter Getränke.","Regelmäßig essen, nicht aus Stress oder Langeweile.","Abends leichter essen und genug schlafen."],
+ meals:[
+  {n:"Frühstück: Haferflocken mit Quark und Beeren",i:["Haferflocken","Magerquark","Beeren","Nüsse"]},
+  {n:"Mittag: Linsensalat mit Feta",i:["Linsen","Feta","Gurke","Tomaten","Olivenöl"]},
+  {n:"Abend: Ofengemüse mit Lachs",i:["Lachsfilet","Zucchini","Paprika","Kartoffeln","Zitrone"]},
+  {n:"Snack: Joghurt, Apfel, Mandeln",i:["Naturjoghurt","Äpfel","Mandeln"]}
+ ]
+};
+
+var BANNER=[
+ "Heute ist ein guter Tag, um deiner Vision einen Schritt näherzukommen.",
+ "Freiheit entsteht aus vielen kleinen, konsequenten Entscheidungen.",
+ "Du musst nicht alles heute schaffen, nur das Richtige.",
+ "Wer anfängt, ist schon weiter als gestern.",
+ "Dein Unternehmen wächst mit jedem klaren Prozess.",
+ "Energie folgt Bewegung. Starte mit 15 Minuten.",
+ "Ruhig bleiben, Kurs halten, weitergehen.",
+ "Aus Plänen werden Ergebnisse, sobald du den ersten Punkt erledigst.",
+ "Zeit ist dein wertvollstes Gut. Gestalte sie bewusst.",
+ "Konsequenz schlägt Motivation. Mach es zur Gewohnheit.",
+ "Heute säst du, was dein zukünftiges Ich erntet.",
+ "Kleine Fortschritte sind trotzdem Fortschritte.",
+ "Du bestimmst, wohin die Reise geht.",
+ "Gesundheit ist das Fundament jeder Freiheit.",
+ "Fokussiere dich auf das, was du beeinflussen kannst.",
+ "Mut ist, trotz Zweifel den nächsten Schritt zu gehen.",
+ "Automatisiere das Wiederkehrende, gestalte das Wesentliche.",
+ "Dankbarkeit macht den Blick klar und den Tag leichter.",
+ "Ein klares Ziel macht jede Entscheidung einfacher.",
+ "Geduld ist die stille Schwester des Erfolgs.",
+ "Atme durch, priorisiere, handle.",
+ "Dein Leben darf leicht und erfolgreich zugleich sein.",
+ "Jeder Tag ohne Aufschieben ist ein gewonnener Tag.",
+ "Gute Gewohnheiten arbeiten für dich, auch wenn du müde bist.",
+ "Reisen, Zeit, Freiheit: Alles beginnt mit einer Entscheidung.",
+ "Trink ein Glas Wasser und starte frisch in den nächsten Block.",
+ "Was du heute festhältst, wird morgen sichtbar.",
+ "Vertraue dem Prozess und bleib in Bewegung.",
+ "Stark wird, wer auch an ruhigen Tagen dranbleibt.",
+ "Deine Vision ist größer als jede Ausrede."
+];
+/* Tageswechsel um 12:00 Uhr lokaler Zeit */
+function bannerIdx(){var d=new Date(Date.now()-12*3600*1000);return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)}
+var bIdx=bannerIdx(),bPaused=false;
+function drawBanner(){
+  var t=BANNER[bIdx%BANNER.length],tr=$("track");if(!tr)return;
+  var h="";for(var i=0;i<6;i++)h+="<span>"+esc(t)+"</span>";
+  tr.innerHTML=h;tr.style.animationDuration=Math.max(30,Math.round(t.length*0.55))+"s";
+  $("bsr").textContent="Motivation des Tages: "+t;
+}
+function checkBanner(){var n=bannerIdx();if(n!==bIdx){bIdx=n;drawBanner();if(cur==="dash"||cur==="notes")render()}}
+function wordOfDay(){return S.notes.length?S.notes[bIdx%S.notes.length]:null}
+var LANGS=[["de","Deutsch"],["en","English"],["pt","Português"],["fr","Français"],["es","Español"],["uk","Українська"]];
+var TR={
+ "Mut":["Courage","Coragem","Courage","Valentía","Відвага"],
+ "Fokus":["Focus","Foco","Concentration","Enfoque","Фокус"],
+ "Ruhe":["Calm","Calma","Calme","Calma","Спокій"],
+ "Freiheit":["Freedom","Liberdade","Liberté","Libertad","Свобода"],
+ "Disziplin":["Discipline","Disciplina","Discipline","Disciplina","Дисципліна"],
+ "Dankbarkeit":["Gratitude","Gratidão","Gratitude","Gratitud","Вдячність"],
+ "Klarheit":["Clarity","Clareza","Clarté","Claridad","Ясність"],
+ "Energie":["Energy","Energia","Énergie","Energía","Енергія"],
+ "Geduld":["Patience","Paciência","Patience","Paciencia","Терпіння"],
+ "Wachstum":["Growth","Crescimento","Croissance","Crecimiento","Зростання"],
+ "Vertrauen":["Trust","Confiança","Confiance","Confianza","Довіра"],
+ "Leichtigkeit":["Lightness","Leveza","Légèreté","Ligereza","Легкість"],
+ "Schritt für Schritt":["Step by step","Passo a passo","Pas à pas","Paso a paso","Крок за кроком"],
+ "Jetzt handeln":["Act now","Agir agora","Agir maintenant","Actuar ahora","Дій зараз"]
+};
+function trOf(n){var a=n.tr||TR[n.t]||[];return[n.t,a[0]||"",a[1]||"",a[2]||"",a[3]||"",a[4]||""]}
+function langSet(n){
+  var w=trOf(n),rot=[-1.5,1,-1,1.5,-.5,1];
+  return LANGS.map(function(l,i){return '<div class="postit l-'+l[0]+'" lang="'+l[0]+'" style="--r:'+rot[i]+'deg"><span class="plabel">'+l[1]+'</span><span class="pw">'+(w[i]?esc(w[i]):"–")+'</span></div>'}).join("");
+}
+function postit(n,i,ctrl){
+  var rot=[-2,1.5,-1,2,-1.5,1][i%6];
+  var c=ctrl?'<div class="pa"><button data-act="npin" data-id="'+n.id+'" aria-pressed="'+!!n.pin+'" aria-label="Auf dem Dashboard anheften">'+(n.pin?"Angeheftet":"Anheften")+'</button><button data-act="ndel" data-id="'+n.id+'" aria-label="Post-it entfernen">Entfernen</button></div>':'';
+  return '<div class="postit c'+(i%3)+(n.pin?' pinned':'')+'" style="--r:'+rot+'deg"><span class="pw">'+esc(n.t)+'</span>'+c+'</div>';
+}
+
+/* ---------- Navigation ---------- */
+var cur="dash",tmr=null;
+function buildNav(){
+  var h=VIEWS.map(function(v){return '<button class="navbtn" data-act="nav" data-v="'+v[0]+'"'+(v[0]===cur?' aria-current="page"':'')+'>'+v[1]+'</button>'}).join("");
+  document.getElementById("tabs").innerHTML=h;
+  document.getElementById("side").innerHTML='<div class="brand">My<span>Free</span>Vision</div>'+h;
+}
+function go(v){
+  if(tmr){clearInterval(tmr);tmr=null}
+  cur=v;try{history.replaceState(null,"","#"+v)}catch(e){}
+  buildNav();render();window.scrollTo(0,0);
+  var tab=document.querySelector('#tabs [aria-current="page"]');if(tab&&tab.scrollIntoView)tab.scrollIntoView({inline:"center",block:"nearest"});
+}
+function render(){
+  document.documentElement.classList.toggle("calm",!!S.calm);
+  var m=document.getElementById("main");
+  var f=R[cur]||R.dash;m.innerHTML=f();
+  if(R_after[cur])R_after[cur]();
+}
+var R={},R_after={};
+
+/* ---------- Fortschrittswerte ---------- */
+function streak(map){var n=0,d=new Date();if(!map[dkey(d)])d.setDate(d.getDate()-1);while(map[dkey(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function goalPct(g){if(!g.ms.length)return 0;return Math.round(g.ms.filter(function(m){return m.d}).length/g.ms.length*100)}
+function allGoalsPct(){if(!S.goals.length)return 0;return Math.round(S.goals.reduce(function(a,g){return a+goalPct(g)},0)/S.goals.length)}
+function last7(){var a=[],d=new Date();d.setDate(d.getDate()-6);for(var i=0;i<7;i++){a.push(new Date(d));d.setDate(d.getDate()+1)}return a}
+
+/* ---------- Dashboard ---------- */
+function dashNotes(){
+  var w=wordOfDay();if(!w)return"";
+  var pins=S.notes.filter(function(n){return n.pin&&n.id!==w.id}).slice(0,3);
+  return '<p class="eyebrow">Wort des Tages in sechs Sprachen</p><div class="postits six">'+langSet(w)+'</div>'+
+  (pins.length?'<p class="eyebrow">Angeheftet</p><div class="postits">'+pins.map(function(n,i){return postit(n,i,false)}).join("")+'</div>':'')+
+  '<p style="margin-bottom:1rem"><button class="small" data-act="nav" data-v="notes">Alle Post-its</button></p>';
+}
+R.dash=function(){
+  var w=S.water[today()]||0,wp=Math.min(100,Math.round(w/S.waterGoal*100));
+  var hDone=S.habits.filter(function(h){return h.log[today()]}).length,hTot=S.habits.length;
+  var hp=hTot?Math.round(hDone/hTot*100):0;
+  var bars=last7().map(function(d){var c=S.water[dkey(d)]||0,p=Math.min(100,Math.round(c/S.waterGoal*100));return '<div><b style="height:'+p+'%" title="'+c+' Gläser"></b>'+["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()]+'</div>'}).join("");
+  var open=0;S.goals.forEach(function(g){g.ms.forEach(function(m){if(!m.d)open++})});
+  return '<p class="eyebrow">'+new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+'</p><h1>Dein Fortschritt</h1><p class="muted">Ein Blick auf alles, was dich Schritt für Schritt zu deiner Vision bringt.</p><hr class="hr">'+dashNotes()+
+  '<div class="grid two">'+
+  '<div class="card"><p class="eyebrow">Wasser heute</p><p class="big">'+w+' / '+S.waterGoal+'</p><div class="bar" aria-hidden="true"><i style="width:'+wp+'%"></i></div></div>'+
+  '<div class="card"><p class="eyebrow">Gewohnheiten heute</p><p class="big">'+hDone+' / '+hTot+'</p><div class="bar" aria-hidden="true"><i style="width:'+hp+'%"></i></div></div>'+
+  '<div class="card"><p class="eyebrow">Ziele gesamt</p><p class="big">'+allGoalsPct()+' %</p><p class="muted">'+open+' offene Meilensteine</p></div>'+
+  '<div class="card"><p class="eyebrow">Sport</p><p class="big">'+streak(S.sport)+' Tage</p><p class="muted">'+(S.sport[today()]?"Heute erledigt":"Heute noch offen")+' (Serie)</p></div>'+
+  '</div><div class="card"><h2>Wasser, letzte 7 Tage</h2><div class="bars">'+bars+'</div></div>'+
+  '<div class="card"><h3>Heutiger Fokus</h3><p>'+esc(S.focus[today()]||"Noch nicht gesetzt.")+'</p><button data-act="nav" data-v="morning">Zur Morgenmotivation</button></div>';
+};
+
+/* ---------- Vision Board ---------- */
+R.vision=function(){
+  var cards=S.vision.map(function(v){return '<div class="card vcard"><div><p class="eyebrow">Vision</p><h3>'+esc(v.title)+'</h3><p>'+esc(v.text)+'</p></div><div class="row"><button class="small" data-act="vedit" data-id="'+v.id+'">Bearbeiten</button><button class="small ghost" data-act="vdel" data-id="'+v.id+'">Entfernen</button></div></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Vision Board</h1><p class="muted">Dein Leben in sechs Bildern aus Worten. Lies es täglich.</p><hr class="hr"><div class="grid two">'+cards+'</div>'+
+  '<div class="card"><h2>Neue Vision</h2><div class="stack"><div><label for="vt">Titel</label><input id="vt" maxlength="60"></div><div><label for="vx">Beschreibung</label><textarea id="vx" maxlength="300"></textarea></div><button class="primary" data-act="vadd">Hinzufügen</button></div></div>';
+};
+
+/* ---------- Post-its ---------- */
+R.notes=function(){
+  var list=S.notes.map(function(n){return '<div class="card"><div class="row between"><h2>'+esc(n.t)+'</h2><div class="row"><button class="small" data-act="npin" data-id="'+n.id+'" aria-pressed="'+!!n.pin+'">'+(n.pin?"Angeheftet":"Anheften")+'</button><button class="small ghost" data-act="ndel" data-id="'+n.id+'" aria-label="'+esc(n.t)+' entfernen">Entfernen</button></div></div><div class="postits six">'+langSet(n)+'</div></div>'}).join("");
+  var ex=LANGS.slice(1).map(function(l){return '<div><label for="ni-'+l[0]+'">'+l[1]+' (optional)</label><input id="ni-'+l[0]+'" maxlength="40" lang="'+l[0]+'"></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Post-its</h1><p class="muted">Jedes Wort in Deutsch, English, Português, Français, Español und Українська, je Sprache in einer eigenen Farbe.</p><hr class="hr">'+
+  (list||'<div class="card"><p class="muted">Keine Post-its vorhanden.</p></div>')+
+  '<div class="card"><h2>Neues Wort</h2><div class="stack"><div><label for="ni">Deutsch</label><input id="ni" maxlength="40" placeholder="Wort oder kurzer Satz"></div><details><summary>Übersetzungen eintragen</summary><div class="stack">'+ex+'<p class="muted"><span class="tag ext">KI-API nötig</span> Automatisches Übersetzen braucht einen externen Dienst und ist nicht aktiv. Ohne Eintrag bleibt das Feld leer.</p></div></details><div class="row"><button class="primary" data-act="nadd">Hinzufügen</button><button data-act="nshuffle">Mischen</button></div></div></div>';
+};
+
+/* ---------- Ziele ---------- */
+R.goals=function(){
+  var list=S.goals.map(function(g){
+    var ms=g.ms.map(function(m,i){return '<div class="check'+(m.d?' done':'')+'"><input type="checkbox" '+(m.d?'checked':'')+' data-act="mtoggle" data-id="'+g.id+'" data-i="'+i+'" aria-label="Meilenstein erledigt"><span class="t">'+esc(m.t)+'</span><button class="x" data-act="mdel" data-id="'+g.id+'" data-i="'+i+'" aria-label="Meilenstein löschen">×</button></div>'}).join("");
+    return '<div class="card"><div class="row between"><h2>'+esc(g.title)+'</h2><span class="tag">'+goalPct(g)+' %</span></div>'+(g.due?'<p class="muted">Bis '+esc(new Date(g.due).toLocaleDateString("de-DE"))+'</p>':'')+'<div class="bar" aria-hidden="true"><i style="width:'+goalPct(g)+'%"></i></div>'+ms+
+    '<div class="row" style="margin-top:.6rem"><input id="m-'+g.id+'" placeholder="Neuer Meilenstein" style="flex:1;min-width:160px" aria-label="Neuer Meilenstein"><button class="small" data-act="madd" data-id="'+g.id+'">Hinzufügen</button><button class="small ghost" data-act="gdel" data-id="'+g.id+'">Ziel löschen</button></div></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Ziele und Meilensteine</h1><p class="muted">Große Ziele in kleine, abhakbare Schritte zerlegen.</p><hr class="hr">'+(list||'<div class="card"><p class="muted">Noch kein Ziel angelegt.</p></div>')+
+  '<div class="card"><h2>Neues Ziel</h2><div class="stack"><div><label for="gt">Ziel</label><input id="gt" maxlength="80"></div><div><label for="gd">Zieldatum (optional)</label><input id="gd" type="date"></div><button class="primary" data-act="gadd">Ziel anlegen</button></div></div>';
+};
+
+/* ---------- Morgenmotivation ---------- */
+R.morning=function(){
+  var all=MORNING.concat(S.quotes);var d=new Date();var doy=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5);
+  var q=all[doy%all.length];
+  return '<p class="eyebrow">Modul</p><h1>Morgenmotivation</h1><p class="muted">Zwei Minuten für einen klaren Start.</p><hr class="hr">'+
+  '<div class="card"><p class="eyebrow">Impuls des Tages</p><p class="quote">'+esc(q)+'</p></div>'+
+  '<div class="card"><h2>Mein Fokus heute</h2><div class="stack"><textarea id="fx" aria-label="Fokus heute" placeholder="Was ist heute das Wichtigste?">'+esc(S.focus[today()]||"")+'</textarea><button class="primary" data-act="fsave">Speichern</button></div></div>'+
+  '<div class="card"><h2>Eigener Impuls</h2><div class="stack"><input id="nq" maxlength="140" placeholder="Eigenen Satz hinzufügen" aria-label="Eigener Impuls"><button data-act="qadd">Zur Sammlung hinzufügen</button><p class="muted">'+S.quotes.length+' eigene Impulse gespeichert.</p></div></div>'+
+  '<div class="card"><span class="tag ext">KI-API nötig</span><p class="muted" style="margin-top:.5rem">Täglich neu generierte, persönliche Motivationstexte benötigen eine externe KI-API und sind in dieser Version nicht aktiv.</p></div>';
+};
+
+/* ---------- Video-Coach ---------- */
+R.video=function(){
+  var topics=VIDEO_TOPICS.map(function(t){return '<div class="card"><h3>'+esc(t[0])+'</h3><p class="muted">'+esc(t[1])+'</p></div>'}).join("");
+  var list=S.videos.map(function(v){var u=safeUrl(v.url);return '<div class="check'+(v.d?' done':'')+'"><input type="checkbox" '+(v.d?'checked':'')+' data-act="vtoggle" data-id="'+v.id+'" aria-label="Video gesehen"><span class="t">'+esc(v.t)+'</span>'+(u?'<a class="btn small" style="min-height:36px" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Öffnen</a>':'')+'<button class="x" data-act="vdel2" data-id="'+v.id+'" aria-label="Video löschen">×</button></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Täglich ein Video von 7 bis 8 Minuten. <span class="tag ext">Externe Links</span></p><hr class="hr">'+
+  '<div class="card"><h2>Meine Videoliste</h2>'+(list||'<p class="muted">Noch keine Videos. Füge unten einen Link hinzu.</p>')+'</div>'+
+  '<div class="card"><h2>Video hinzufügen</h2><div class="stack"><div><label for="vtt">Titel</label><input id="vtt" maxlength="90"></div><div><label for="vtu">Link (z. B. YouTube)</label><input id="vtu" type="url" inputmode="url" placeholder="https://"></div><button class="primary" data-act="vidadd">Speichern</button><p class="muted">Videos öffnen sich im neuen Tab bei einem externen Anbieter. Dafür ist eine Internetverbindung nötig.</p></div></div>'+
+  '<h2 style="margin-top:1.2rem">Themenideen</h2><div class="grid two">'+topics+'</div>';
+};
+
+/* ---------- Sport ---------- */
+var sp={name:"Ganzkörper",sec:900,run:false};
+R.sport=function(){
+  var opts=Object.keys(WORKOUTS).map(function(k){return '<option'+(k===sp.name?' selected':'')+'>'+k+'</option>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>15-Minuten-Sport</h1><p class="muted">Drei Übungen, fünf Runden, je Übung eine Minute. Ohne Geräte.</p><hr class="hr">'+
+  '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
+  '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
+  '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
+  '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
+};
+R_after.sport=function(){drawTimer()};
+function drawTimer(){
+  var t=document.getElementById("wtime");if(!t)return;
+  var m=Math.floor(sp.sec/60),s=sp.sec%60;t.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  var ex=WORKOUTS[sp.name],idx=Math.floor((900-sp.sec)/60)%ex.length;if(sp.sec===0)idx=0;
+  document.getElementById("wnow").textContent=sp.sec===0?"Geschafft":(sp.sec===900&&!sp.run?"Bereit":"Jetzt: "+ex[idx]);
+  var b=document.getElementById("wbtn");if(b)b.textContent=sp.run?"Pause":"Start";
+}
+function wtick(){sp.sec--;if(sp.sec<=0){sp.sec=0;sp.run=false;clearInterval(tmr);tmr=null;S.sport[today()]=true;save();toast("15 Minuten geschafft.")}drawTimer()}
+
+/* ---------- Ernährung ---------- */
+R.food=function(){
+  var meals=FOOD.meals.map(function(m,i){return '<div class="check"><span class="t">'+esc(m.n)+'</span><button class="small" data-act="fshop" data-i="'+i+'">Zur Einkaufsliste</button></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Ernährungs-Guide</h1><p class="muted">Einfache Prinzipien statt komplizierter Diäten. Allgemeine Orientierung, keine medizinische Beratung.</p><hr class="hr">'+
+  '<div class="card"><h2>Grundregeln</h2><ul style="padding-left:1.2rem">'+FOOD.rules.map(function(r){return '<li>'+esc(r)+'</li>'}).join("")+'</ul></div>'+
+  '<div class="card"><h2>Mahlzeiten-Ideen</h2>'+meals+'</div>';
+};
+
+/* ---------- Wochenplan ---------- */
+R.week=function(){
+  var dn=(new Date().getDay()+6)%7;
+  return '<p class="eyebrow">Modul</p><h1>Wochenplan</h1><p class="muted">Pro Tag: Sport, Mahlzeiten, Termine, Fokus. Änderungen werden automatisch gespeichert.</p><hr class="hr">'+
+  DAYS.map(function(d,i){return '<div class="card"><div class="row between"><label for="wd'+i+'" style="margin:0;font-size:.95rem;color:var(--text)"><b>'+d+'</b></label>'+(i===dn?'<span class="tag">Heute</span>':'')+'</div><textarea id="wd'+i+'" data-act="wk" data-d="'+i+'" style="margin-top:.4rem">'+esc(S.week[i]||"")+'</textarea></div>'}).join("");
+};
+
+/* ---------- Einkaufsliste ---------- */
+R.shop=function(){
+  var l=S.shop.map(function(s){return '<div class="check'+(s.d?' done':'')+'"><input type="checkbox" '+(s.d?'checked':'')+' data-act="stoggle" data-id="'+s.id+'" aria-label="Erledigt"><span class="t">'+esc(s.t)+'</span><button class="x" data-act="sdel" data-id="'+s.id+'" aria-label="Löschen">×</button></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Einkaufsliste</h1><hr class="hr"><div class="card"><div class="row"><input id="si" maxlength="60" placeholder="Artikel" style="flex:1;min-width:160px" aria-label="Artikel"><button class="primary" data-act="sadd">Hinzufügen</button></div></div>'+
+  '<div class="card">'+(l||'<p class="muted">Die Liste ist leer.</p>')+'</div>'+(S.shop.some(function(s){return s.d})?'<button data-act="sclear">Erledigte entfernen</button>':'');
+};
+
+/* ---------- Wasser ---------- */
+R.water=function(){
+  var w=S.water[today()]||0,ml=w*S.waterMl;
+  var dr="";for(var i=1;i<=Math.max(S.waterGoal,w);i++)dr+='<button class="drop'+(i<=w?' on':'')+'" data-act="wset" data-n="'+i+'" aria-label="'+i+'. Glas" aria-pressed="'+(i<=w)+'">'+i+'</button>';
+  return '<p class="eyebrow">Modul</p><h1>Wasser-Tracker</h1><hr class="hr">'+
+  '<div class="card"><p class="big">'+(ml/1000).toFixed(2).replace(".",",")+' l</p><p class="muted">'+w+' von '+S.waterGoal+' Gläsern ('+S.waterMl+' ml je Glas)</p><div class="bar" aria-hidden="true"><i style="width:'+Math.min(100,Math.round(w/S.waterGoal*100))+'%"></i></div><div class="drops" style="margin-top:.8rem">'+dr+'</div><div class="row" style="margin-top:.8rem"><button class="primary" data-act="wplus">+ 1 Glas</button><button data-act="wminus">− 1 Glas</button></div></div>'+
+  '<div class="card"><h2>Tagesziel</h2><div class="row"><div style="flex:1;min-width:120px"><label for="wg">Gläser pro Tag</label><input id="wg" type="number" min="1" max="20" value="'+S.waterGoal+'"></div><div style="flex:1;min-width:120px"><label for="wm">ml pro Glas</label><input id="wm" type="number" min="100" max="1000" step="50" value="'+S.waterMl+'"></div></div><button data-act="wcfg" style="margin-top:.6rem">Übernehmen</button></div>';
+};
+
+/* ---------- Gewohnheiten ---------- */
+R.habits=function(){
+  var l=S.habits.map(function(h){var on=!!h.log[today()];return '<div class="check'+(on?' done':'')+'"><input type="checkbox" '+(on?'checked':'')+' data-act="htoggle" data-id="'+h.id+'" aria-label="Heute erledigt"><span class="t">'+esc(h.t)+'<br><span class="muted">Serie: '+streak(h.log)+' Tage</span></span><button class="x" data-act="hdel" data-id="'+h.id+'" aria-label="Gewohnheit löschen">×</button></div>'}).join("");
+  return '<p class="eyebrow">Modul</p><h1>Gewohnheiten</h1><p class="muted">Jeden Tag abhaken. Die Serie zählt zusammenhängende Tage.</p><hr class="hr"><div class="card">'+(l||'<p class="muted">Keine Gewohnheiten angelegt.</p>')+'</div><div class="card"><div class="row"><input id="hi" maxlength="60" placeholder="Neue Gewohnheit" style="flex:1;min-width:160px" aria-label="Neue Gewohnheit"><button class="primary" data-act="hadd">Hinzufügen</button></div></div>';
+};
+
+/* ---------- Daten / Sicherung ---------- */
+R.data=function(){
+  return '<p class="eyebrow">Einstellungen</p><h1>Daten und Sicherung</h1><p class="muted">Alle Daten liegen nur in diesem Browser auf diesem Gerät. Sie werden nicht übertragen.</p><hr class="hr">'+
+  '<div class="card"><h2>Sicherungskopie</h2><p>Speichere regelmäßig eine Sicherung, besonders vor dem Löschen von Browserdaten. Mac und iPhone synchronisieren nicht automatisch; über die Sicherungsdatei kannst du Daten übertragen.</p><div class="row"><button class="primary" data-act="export">Sicherung herunterladen</button><button data-act="import">Sicherung einspielen</button></div><input type="file" id="imp" accept="application/json,.json" hidden></div>'+
+  '<div class="card"><h2>Bewegung</h2><p>Post-its, Karten und Laufband bewegen sich leicht. Bei Bedarf lässt sich das abschalten. Die Einstellung "Bewegung reduzieren" Ihres Geräts wird ebenfalls beachtet.</p><button data-act="calm" aria-pressed="'+!!S.calm+'">'+(S.calm?'Bewegung einschalten':'Bewegung ausschalten')+'</button></div>'+
+  '<div class="card"><h2>Externe Dienste</h2><p><span class="tag ext">Extern</span> Video-Links öffnen Seiten externer Anbieter.</p><p><span class="tag ext">KI-API nötig</span> Personalisierte KI-Texte sind nicht aktiv.</p></div>'+
+  '<div class="card"><h2>Zurücksetzen</h2><p class="muted">Löscht alle Daten dieser App in diesem Browser. Lade vorher eine Sicherung herunter.</p><button class="ghost" data-act="reset">Alles zurücksetzen</button></div>';
+};
+
+/* ---------- Aktionen ---------- */
+function $(id){return document.getElementById(id)}
+function val(id){var e=$(id);return e?e.value.trim():""}
+function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]}
+var A={
+ nav:function(e){go(e.dataset.v)},
+ calm:function(){S.calm=!S.calm;save();render()},
+ nadd:function(){var t=val("ni");if(!t)return toast("Bitte ein Wort eingeben.");var tr=["en","pt","fr","es","uk"].map(function(c){return val("ni-"+c)});var n={id:uid(),t:t,pin:false};if(tr.some(function(x){return x}))n.tr=tr;S.notes.push(n);save();render()},
+ ndel:function(e){S.notes=S.notes.filter(function(n){return n.id!==e.dataset.id});save();render()},
+ npin:function(e){var n=by(S.notes,e.dataset.id);if(!n)return;if(!n.pin&&S.notes.filter(function(x){return x.pin}).length>=3)return toast("Höchstens 3 Post-its anheften.");n.pin=!n.pin;save();render()},
+ nshuffle:function(){for(var i=S.notes.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=S.notes[i];S.notes[i]=S.notes[j];S.notes[j]=t}save();render()},
+ vadd:function(){var t=val("vt");if(!t)return toast("Bitte einen Titel eingeben.");S.vision.push({id:uid(),title:t,text:val("vx")});save();render()},
+ vedit:function(e){var v=by(S.vision,e.dataset.id);var t=prompt("Titel",v.title);if(t===null)return;var x=prompt("Beschreibung",v.text);if(x===null)return;v.title=t.trim()||v.title;v.text=x.trim();save();render()},
+ vdel:function(e){if(confirm("Diese Vision entfernen?")){S.vision=S.vision.filter(function(v){return v.id!==e.dataset.id});save();render()}},
+ gadd:function(){var t=val("gt");if(!t)return toast("Bitte ein Ziel eingeben.");S.goals.push({id:uid(),title:t,due:val("gd"),ms:[]});save();render()},
+ gdel:function(e){if(confirm("Ziel samt Meilensteinen löschen?")){S.goals=S.goals.filter(function(g){return g.id!==e.dataset.id});save();render()}},
+ madd:function(e){var t=val("m-"+e.dataset.id);if(!t)return;by(S.goals,e.dataset.id).ms.push({t:t,d:false});save();render()},
+ mtoggle:function(e){var m=by(S.goals,e.dataset.id).ms[+e.dataset.i];m.d=e.checked;save();render()},
+ mdel:function(e){by(S.goals,e.dataset.id).ms.splice(+e.dataset.i,1);save();render()},
+ fsave:function(){S.focus[today()]=val("fx");save();toast("Fokus gespeichert.")},
+ qadd:function(){var t=val("nq");if(!t)return;S.quotes.push(t);save();render();toast("Impuls gespeichert.")},
+ vidadd:function(){var t=val("vtt");if(!t)return toast("Bitte einen Titel eingeben.");var u=val("vtu");if(u&&!safeUrl(u))return toast("Der Link ist ungültig.");S.videos.push({id:uid(),t:t,url:u,d:false});save();render()},
+ vtoggle:function(e){by(S.videos,e.dataset.id).d=e.checked;save();render()},
+ vdel2:function(e){S.videos=S.videos.filter(function(v){return v.id!==e.dataset.id});save();render()},
+ wstart:function(){if(sp.run){sp.run=false;clearInterval(tmr);tmr=null}else{if(sp.sec<=0)sp.sec=900;sp.run=true;tmr=setInterval(wtick,1000)}drawTimer()},
+ wreset:function(){sp.run=false;sp.sec=900;if(tmr){clearInterval(tmr);tmr=null}drawTimer()},
+ wdone:function(){if(S.sport[today()])delete S.sport[today()];else S.sport[today()]=true;save();render()},
+ fshop:function(e){var m=FOOD.meals[+e.dataset.i];m.i.forEach(function(n){if(!S.shop.some(function(s){return s.t===n&&!s.d}))S.shop.push({id:uid(),t:n,d:false})});save();toast("Zutaten hinzugefügt.")},
+ sadd:function(){var t=val("si");if(!t)return;S.shop.push({id:uid(),t:t,d:false});save();render();var i=$("si");if(i)i.focus()},
+ stoggle:function(e){by(S.shop,e.dataset.id).d=e.checked;save();render()},
+ sdel:function(e){S.shop=S.shop.filter(function(s){return s.id!==e.dataset.id});save();render()},
+ sclear:function(){S.shop=S.shop.filter(function(s){return!s.d});save();render()},
+ wset:function(e){var n=+e.dataset.n,c=S.water[today()]||0;S.water[today()]=(n===c)?n-1:n;save();render()},
+ wplus:function(){S.water[today()]=(S.water[today()]||0)+1;save();render()},
+ wminus:function(){S.water[today()]=Math.max(0,(S.water[today()]||0)-1);save();render()},
+ wcfg:function(){var g=parseInt(val("wg"),10),m=parseInt(val("wm"),10);if(!(g>=1&&g<=20&&m>=100&&m<=1000))return toast("Bitte gültige Werte eingeben.");S.waterGoal=g;S.waterMl=m;save();render();toast("Gespeichert.")},
+ hadd:function(){var t=val("hi");if(!t)return;S.habits.push({id:uid(),t:t,log:{}});save();render()},
+ htoggle:function(e){var h=by(S.habits,e.dataset.id);if(e.checked)h.log[today()]=true;else delete h.log[today()];save();render()},
+ hdel:function(e){if(confirm("Gewohnheit löschen?")){S.habits=S.habits.filter(function(h){return h.id!==e.dataset.id});save();render()}},
+ export:function(){var b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="MyFreeVision-Sicherung-"+today()+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)},
+ import:function(){$("imp").click()},
+ reset:function(){if(confirm("Wirklich alle Daten löschen?")&&confirm("Letzte Warnung: Das kann nicht rückgängig gemacht werden.")){S=JSON.parse(JSON.stringify(DEFAULT));save();render();toast("Zurückgesetzt.")}}
+};
+document.addEventListener("click",function(ev){
+  var el=ev.target.closest("[data-act]");if(!el)return;
+  var a=el.dataset.act;if(el.tagName==="INPUT"&&el.type==="checkbox"){return}
+  if(el.tagName==="TEXTAREA")return;
+  if(A[a])A[a](el);
+});
+document.addEventListener("change",function(ev){
+  var el=ev.target;
+  if(el.id==="wsel"){sp.name=el.value;sp.sec=900;sp.run=false;if(tmr){clearInterval(tmr);tmr=null}render();return}
+  if(el.id==="imp"&&el.files[0]){
+    var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||typeof o!=="object"||!Array.isArray(o.vision)||!Array.isArray(o.habits))throw 0;if(!confirm("Aktuelle Daten durch die Sicherung ersetzen?"))return;S=o;for(var k in DEFAULT)if(!(k in S))S[k]=JSON.parse(JSON.stringify(DEFAULT[k]));save();render();toast("Sicherung eingespielt.")}catch(e){toast("Datei ist keine gültige Sicherung.")}};r.readAsText(el.files[0]);return}
+  var a=el.dataset&&el.dataset.act;
+  if(a==="wk"){S.week[el.dataset.d]=el.value;save();return}
+  if(el.type==="checkbox"&&a&&A[a])A[a](el);
+});
+document.addEventListener("input",function(ev){var el=ev.target;if(el.dataset&&el.dataset.act==="wk"){S.week[el.dataset.d]=el.value;save()}});
+document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.tagName==="INPUT"&&ev.target.type!=="checkbox"&&ev.target.type!=="file"){var btn=ev.target.closest(".card");if(btn){var p=btn.querySelector("button.primary,button[data-act='madd']");if(p)p.click()}}});
+
+var h=location.hash.replace("#","");if(VIEWS.some(function(v){return v[0]===h}))cur=h;
+buildNav();render();drawBanner();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+$("bpause").addEventListener("click",function(){bPaused=!bPaused;$("banner").classList.toggle("paused",bPaused);this.setAttribute("aria-pressed",bPaused);this.textContent=bPaused?"Weiter":"Pause";this.setAttribute("aria-label",bPaused?"Laufband fortsetzen":"Laufband anhalten")});
+setInterval(checkBanner,30000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)checkBanner()});
+</script>
+</body>
+</html>

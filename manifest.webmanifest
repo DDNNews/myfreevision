@@ -1,0 +1,26 @@
+{
+  "name": "MyFreeVision",
+  "short_name": "MyFreeVision",
+  "description": "Vision, Ziele, Gewohnheiten und Fortschritt",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "de",
+  "background_color": "#F0EDE5",
+  "theme_color": "#F0EDE5",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
