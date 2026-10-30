@@ -144,6 +144,20 @@ summary{cursor:pointer;font-weight:600;min-height:36px;display:flex;align-items:
 .postit.l-es{background:var(--muted);border-color:var(--text);color:var(--text)}
 .postit.l-uk{background:var(--text);border-color:var(--text);color:var(--bg)}
 html.calm .postit,html.calm .card{animation:none!important}
+.vlist{display:flex;flex-direction:column}
+.vitem{display:flex;gap:.75rem;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line);min-width:0}
+.vitem:last-child{border-bottom:0}
+.vplay{flex:none;width:56px;height:40px;min-height:40px;padding:0;border-radius:8px;border:0;background:var(--accent);color:var(--text);font-size:1rem}
+.vmeta{flex:1;min-width:0}
+.vmeta b{display:block;font-weight:600;line-height:1.3}
+.vmeta span{font-family:var(--sans);font-size:.75rem;color:var(--muted)}
+.vlinks{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.2rem}
+.vlinks a,.vlinks button{font-family:var(--sans);font-size:.75rem;color:var(--text);background:none;border:0;padding:.2rem 0;min-height:32px;text-decoration:underline;margin-right:.6rem}
+.vframe{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--text);margin:.6rem 0}
+.vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.card.novib{animation:none!important}
+.vhero{display:flex;flex-direction:column;gap:.4rem}
+.vhero .vplay{width:100%;height:auto;min-height:52px;font-family:var(--sans);font-size:.95rem;font-weight:600}
 html.calm .ticker{white-space:normal;overflow:visible;text-align:center;padding:.5rem .8rem}
 html.calm .ticker-track{display:block;width:auto;animation:none!important}
 html.calm .ticker-track span:not(:first-child){display:none}
@@ -179,7 +193,7 @@ var DEFAULT={
   ],
   goals:[],quotes:[],videos:[],week:{},shop:[],
   notes:["Mut","Fokus","Ruhe","Freiheit","Disziplin","Dankbarkeit","Klarheit","Energie","Geduld","Wachstum","Vertrauen","Leichtigkeit","Schritt für Schritt","Jetzt handeln"].map(function(t,i){return{id:"n"+(i+1),t:t,pin:false}}),
-  calm:false,
+  calm:false,vseen:{},
   water:{},waterGoal:8,waterMl:250,focus:{},sport:{},
   habits:[{id:"h1",t:"Morgenmotivation lesen",log:{}},{id:"h2",t:"15 Minuten Bewegung",log:{}},{id:"h3",t:"Wasserziel erreichen",log:{}}]
 };
@@ -301,6 +315,47 @@ function postit(n,i,ctrl){
   return '<div class="postit c'+(i%3)+(n.pin?' pinned':'')+'" style="--r:'+rot+'deg"><span class="pw">'+esc(n.t)+'</span>'+c+'</div>';
 }
 
+/* ---------- YouTube-Bibliothek (extern) ---------- */
+var VLIB={
+ mot:[
+  {id:"BZZjMwVKqX0",t:"4 Minuten pure Motivation",ch:"Sascha Huber",d:"4:26"},
+  {id:"J33IWmZsFjk",t:"PowerTalk für einen positiven Start in den Tag",ch:"Laura Malina Seiler",d:"6:14"},
+  {id:"lfxXK-Dcz-c",t:"Der gute Start in deinen neuen Tag",ch:"Robert Betz",d:"5:40"},
+  {id:"J7wMaw2ZPYk",t:"Steh wieder auf!",ch:"Dennis Osaj",d:"5:33"},
+  {id:"_VFRpeEQQxM",t:"Geführte Meditation für den Morgen",ch:"Mady Morrison",d:"5:56"},
+  {id:"H1AM0-9koVc",t:"50 positive Affirmationen für den Morgen",ch:"Mady Morrison",d:"12:22"},
+  {id:"wcG-duYAdYM",t:"Disziplin entwickeln in 7 Schritten",ch:"Henry Hildebrandt",d:"13:44"},
+  {id:"Mix5JOgYTuQ",t:"Eine der besten Motivationsreden",ch:"Oscar Karem",d:"13:25"}
+ ],
+ sport:{
+  "Ganzkörper":[
+   {id:"JSn5DY10dbA",t:"15 Min Ganzkörper für Anfänger",ch:"Sophia Thiel",d:"15:49"},
+   {id:"2r2pSjrfx5Y",t:"15 Min Ganzkörper, ohne Springen",ch:"Tina Halder",d:"16:10"},
+   {id:"w_FhkddxbDA",t:"15 Min Wohnzimmer-Workout, ohne Springen",ch:"Tina Halder",d:"16:17"},
+   {id:"JmHcsX0goAw",t:"15 Min Ganzkörper-HIIT",ch:"Mady Morrison",d:"16:50"}
+  ],
+  "Core & Rücken":[
+   {id:"0-CoBoWjOL4",t:"15 Min Ganzkörper mit Bauch-Fokus",ch:"Ergotopia",d:"16:36"},
+   {id:"BS0H4jIYk-A",t:"Pilates für einen starken Rücken",ch:"Lena's Health Lab",d:"16:17"},
+   {id:"FMl8MhXC7Ic",t:"15-Minuten-Übungsprogramm für jeden Tag",ch:"Liebscher & Bracht",d:"14:31"},
+   {id:"Hwjqpbh7gYo",t:"Rücken-Yoga für Anfänger",ch:"Mady Morrison",d:"15:57"}
+  ],
+  "Beweglichkeit":[
+   {id:"3LApr1dj4ak",t:"15 Min Ganzkörper-Mobility",ch:"BLACKROLL Recovery",d:"15:37"},
+   {id:"n9yT1CE1fAI",t:"15 Min Dehnen für Rücken und Hüfte",ch:"Liebscher & Bracht",d:"17:29"},
+   {id:"uCKLkc8AGB0",t:"Yoga für Vielsitzer",ch:"Mady Morrison",d:"15:56"},
+   {id:"HzXkMnvqojE",t:"Dehnen für unteren Rücken und Hüfte",ch:"Mady Morrison",d:"15:20"}
+  ]
+ }
+};
+function ytWatch(id){return "https://www.youtube.com/watch?v="+id}
+function vItem(v,slot){
+  var inList=S.videos.some(function(x){return x.url===ytWatch(v.id)});
+  return '<div class="vitem"><button class="vplay" data-act="vplay" data-id="'+v.id+'" data-slot="'+slot+'" aria-label="'+esc(v.t)+' abspielen">▶</button><div class="vmeta"><b>'+esc(v.t)+'</b><span>'+esc(v.ch)+' · '+esc(v.d)+' Min.</span><div class="vlinks"><a href="'+ytWatch(v.id)+'" target="_blank" rel="noopener noreferrer">Auf YouTube öffnen</a>'+(inList?'<span>In meiner Liste</span>':'<button data-act="vsave" data-id="'+v.id+'">In meine Liste</button>')+'</div></div></div><div id="vf-'+slot+'"></div>';
+}
+var YT_NOTE='<p class="muted"><span class="tag ext">Extern: YouTube</span> Das Video lädt erst, wenn Sie auf ▶ tippen. Dann überträgt YouTube (Google) Daten wie Ihre IP-Adresse. Dafür ist Internet nötig.</p>';
+function vOfDay(){return VLIB.mot[bIdx%VLIB.mot.length]}
+
 /* ---------- Navigation ---------- */
 var cur="dash",tmr=null;
 function buildNav(){
@@ -393,10 +448,13 @@ R.morning=function(){
 R.video=function(){
   var topics=VIDEO_TOPICS.map(function(t){return '<div class="card"><h3>'+esc(t[0])+'</h3><p class="muted">'+esc(t[1])+'</p></div>'}).join("");
   var list=S.videos.map(function(v){var u=safeUrl(v.url);return '<div class="check'+(v.d?' done':'')+'"><input type="checkbox" '+(v.d?'checked':'')+' data-act="vtoggle" data-id="'+v.id+'" aria-label="Video gesehen"><span class="t">'+esc(v.t)+'</span>'+(u?'<a class="btn small" style="min-height:36px" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">Öffnen</a>':'')+'<button class="x" data-act="vdel2" data-id="'+v.id+'" aria-label="Video löschen">×</button></div>'}).join("");
-  return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Täglich ein Video von 7 bis 8 Minuten. <span class="tag ext">Externe Links</span></p><hr class="hr">'+
+  var vd=vOfDay(),seen=!!(S.vseen&&S.vseen[today()]);
+  return '<p class="eyebrow">Modul</p><h1>Video-Coach</h1><p class="muted">Jeden Tag ein Impuls-Video. Wechsel täglich um 12:00 Uhr.</p><hr class="hr">'+
+  '<div class="card novib vhero"><p class="eyebrow">Video des Tages</p><h2>'+esc(vd.t)+'</h2><p class="muted" style="margin:0">'+esc(vd.ch)+' · '+esc(vd.d)+' Min.</p><button class="vplay" data-act="vplay" data-id="'+vd.id+'" data-slot="day">▶ Abspielen</button><div id="vf-day"></div><label class="check" style="font-size:.95rem;color:var(--text);margin:0"><input type="checkbox" data-act="vday" '+(seen?'checked':'')+'><span class="t">Heute gesehen</span></label>'+YT_NOTE+'</div>'+
+  '<div class="card novib"><h2>Motivation</h2><div class="vlist">'+VLIB.mot.map(function(v,i){return vItem(v,"m"+i)}).join("")+'</div></div>'+
   '<div class="card"><h2>Meine Videoliste</h2>'+(list||'<p class="muted">Noch keine Videos. Füge unten einen Link hinzu.</p>')+'</div>'+
   '<div class="card"><h2>Video hinzufügen</h2><div class="stack"><div><label for="vtt">Titel</label><input id="vtt" maxlength="90"></div><div><label for="vtu">Link (z. B. YouTube)</label><input id="vtu" type="url" inputmode="url" placeholder="https://"></div><button class="primary" data-act="vidadd">Speichern</button><p class="muted">Videos öffnen sich im neuen Tab bei einem externen Anbieter. Dafür ist eine Internetverbindung nötig.</p></div></div>'+
-  '<h2 style="margin-top:1.2rem">Themenideen</h2><div class="grid two">'+topics+'</div>';
+  '';
 };
 
 /* ---------- Sport ---------- */
@@ -407,6 +465,7 @@ R.sport=function(){
   '<div class="card"><label for="wsel">Programm</label><select id="wsel">'+opts+'</select></div>'+
   '<div class="card"><p class="eyebrow" id="wnow"></p><p class="timer" id="wtime" role="timer" aria-live="off"></p><div class="row" style="justify-content:center;margin-top:.6rem"><button class="primary" data-act="wstart" id="wbtn">Start</button><button data-act="wreset">Zurücksetzen</button></div></div>'+
   '<div class="card"><h2>Ablauf</h2><ol style="padding-left:1.2rem">'+WORKOUTS[sp.name].map(function(e){return '<li>'+esc(e)+'</li>'}).join("")+'</ol><p class="muted">Diese drei Übungen im Wechsel, insgesamt 15 Minuten. Bei Beschwerden bitte abbrechen und ärztlichen Rat einholen.</p></div>'+
+  '<div class="card novib"><h2>Mit Video trainieren</h2><p class="muted">Passend zum Programm „'+esc(sp.name)+'“, je etwa 15 Minuten.</p><div class="vlist">'+VLIB.sport[sp.name].map(function(v,i){return vItem(v,"s"+i)}).join("")+'</div>'+YT_NOTE+'</div>'+
   '<div class="card"><p>Serie: <b>'+streak(S.sport)+' Tage</b>. '+(S.sport[today()]?'Heute erledigt.':'')+'</p><button data-act="wdone">'+(S.sport[today()]?'Als offen markieren':'Heute als erledigt markieren')+'</button></div>';
 };
 R_after.sport=function(){drawTimer()};
@@ -471,6 +530,15 @@ function val(id){var e=$(id);return e?e.value.trim():""}
 function by(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i]}
 var A={
  nav:function(e){go(e.dataset.v)},
+ vplay:function(e){
+  var box=$("vf-"+e.dataset.slot);if(!box)return;
+  if(!navigator.onLine)return toast("Keine Internetverbindung. Das Video braucht Internet.");
+  document.querySelectorAll('[id^="vf-"]').forEach(function(b){if(b!==box)b.innerHTML=""});
+  box.innerHTML='<div class="vframe"><iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(e.dataset.id)+'?autoplay=1&rel=0&playsinline=1" title="YouTube-Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+  var c=box.closest(".card");if(c)c.classList.add("novib");
+ },
+ vsave:function(e){var all=VLIB.mot.concat(VLIB.sport["Ganzkörper"],VLIB.sport["Core & Rücken"],VLIB.sport["Beweglichkeit"]);var v=all.filter(function(x){return x.id===e.dataset.id})[0];if(!v)return;S.videos.push({id:uid(),t:v.t+" ("+v.ch+")",url:ytWatch(v.id),d:false});save();render();toast("In Ihre Videoliste übernommen.")},
+ vday:function(e){S.vseen=S.vseen||{};if(e.checked)S.vseen[today()]=true;else delete S.vseen[today()];save()},
  calm:function(){S.calm=!S.calm;save();render()},
  nadd:function(){var t=val("ni");if(!t)return toast("Bitte ein Wort eingeben.");var tr=["en","pt","fr","es","uk"].map(function(c){return val("ni-"+c)});var n={id:uid(),t:t,pin:false};if(tr.some(function(x){return x}))n.tr=tr;S.notes.push(n);save();render()},
  ndel:function(e){S.notes=S.notes.filter(function(n){return n.id!==e.dataset.id});save();render()},
@@ -528,7 +596,7 @@ document.addEventListener("keydown",function(ev){if(ev.key==="Enter"&&ev.target.
 
 var h=location.hash.replace("#","");if(VIEWS.some(function(v){return v[0]===h}))cur=h;
 buildNav();render();drawBanner();
-if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){var hadCtrl=!!navigator.serviceWorker.controller,swReloaded=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(hadCtrl&&!swReloaded){swReloaded=true;location.reload()}});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").then(function(r){r.update()}).catch(function(){})})}
 $("bpause").addEventListener("click",function(){bPaused=!bPaused;$("banner").classList.toggle("paused",bPaused);this.setAttribute("aria-pressed",bPaused);this.textContent=bPaused?"Weiter":"Pause";this.setAttribute("aria-label",bPaused?"Laufband fortsetzen":"Laufband anhalten")});
 setInterval(checkBanner,30000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden)checkBanner()});
